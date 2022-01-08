@@ -1,25 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+
+const initialState = [
+  {
+    type: "paragraph",
+    value: "Test paragraph",
+  },
+];
+
+const renderNode = ({ type, value }: any, onKeyPress: any) => {
+  switch (type) {
+    case "paragraph": {
+      return (
+        <p onKeyPress={onKeyPress} contentEditable="true">
+          {value}
+        </p>
+      );
+    }
+  }
+};
 
 function App() {
+  const [nodes, setNodes] = useState(initialState);
+
+	const onKeyPress = (event: any) => {
+		if(event.key === "Enter"){
+			setNodes(oldNodes => [...oldNodes, {type: "paragraph", value: ""}])
+		}
+	}
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      {nodes.map((node) => {
+        return renderNode(node, onKeyPress);
+      })}
+    </>
   );
 }
 
