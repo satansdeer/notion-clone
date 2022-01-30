@@ -1,6 +1,5 @@
 body {
   margin: 0;
-  padding: 30px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
@@ -22,21 +21,22 @@ code {
   color: grey;
 }
 
+.node-container {
+	display: flex;
+	flex-direction: row;
+	padding-bottom: 10px;
+}
+
 .node {
-  padding: 10px 20px;
   border-radius: 4px;
 }
 
-.node:hover {
-  background-color: #ededed;
-	cursor: text;
-}
-
-.list {
+.ul {
 	position: relative;
+	padding-left: 20px;
 }
 
-.list::after {
+.ul::after {
   content: "";
   position: absolute;
   bottom: 50%;
@@ -49,6 +49,24 @@ code {
 }
 
 .h1 {
-	font-size: 2em;
+	font-size: 40px;
 	font-weight: bold;
+}
+
+.header-image {
+	width: 100%;
+	max-height: 295px;
+	object-fit: cover;
+}
+
+.page-body {
+	padding-left: 90px;
+	padding-right: 90px;
+	max-width: 900px;
+}
+
+.title-container {
+	padding-left: 90px;
+	padding-right: 90px;
+	max-width: 900px;
 }
