@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppState } from "./AppStateContext";
 
 export const Node = ({
   node,
@@ -11,6 +12,9 @@ export const Node = ({
   handleNavigation,
   index,
 }: any) => {
+  const { pages } = useAppState();
+  const navigate = useNavigate();
+
   const parseCommand = (text: string) => {
     switch (text) {
       case "/text": {
@@ -63,6 +67,10 @@ export const Node = ({
     }
   };
 
+  const navigateToPage = () => {
+    navigate(`/${node.id}`);
+  };
+
   const handleFocus = ({ target }: any) => {
     const range = document.createRange();
     range.selectNodeContents(target);
@@ -74,21 +82,33 @@ export const Node = ({
 
   return (
     <div className="node-container">
-      <div
-        data-placeholder="Type '/' for commands"
-        ref={(el) => {
-          if (el) {
-            el.textContent = node.value;
-          }
-          refFunc(el);
-        }}
-        onFocus={handleFocus}
-        onKeyDown={onKeyDown}
-        onInput={(e) => onChangeNodeValue(node, e.currentTarget.textContent)}
-        contentEditable="true"
-        suppressContentEditableWarning
-        className={`node ${node.type}`}
-      />
+      {node.type === "page" ? (
+        <div
+          ref={(el) => {
+            if (el) {
+              el.textContent = pages[node.id].title;
+            }
+          }}
+          onClick={navigateToPage}
+          className={`node ${node.type}`}
+        />
+      ) : (
+        <div
+          data-placeholder="Type '/' for commands"
+          ref={(el) => {
+            if (el) {
+              el.textContent = node.value;
+            }
+            refFunc(el);
+          }}
+          onFocus={handleFocus}
+          onKeyDown={onKeyDown}
+          onInput={(e) => onChangeNodeValue(node, e.currentTarget.textContent)}
+          contentEditable={node.type !== "page"}
+          suppressContentEditableWarning
+          className={`node ${node.type}`}
+        />
+      )}
     </div>
   );
 };

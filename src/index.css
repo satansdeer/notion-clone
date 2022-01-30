@@ -29,6 +29,13 @@ code {
 
 .node {
   border-radius: 4px;
+	cursor: text;
+	width: 100%;
+}
+
+.node.page {
+	cursor: pointer;
+	font-weight: bold;
 }
 
 .ul {

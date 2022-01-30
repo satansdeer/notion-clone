@@ -1,140 +1,98 @@
-import { nanoid } from "nanoid";
 import { createContext, FC, useContext, useState } from "react";
 
 type AppStateContextType = {
-  pages: any[];
+  pages:any;
   addPage(): any;
 };
 
 const AppStateContext = createContext<any>({} as AppStateContextType);
 
-const initialState = [
-  {
+const initialPages = {
+  testpage0: {
     id: "testpage0",
     title: "Notion App Clone",
     header:
       "https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fpage-cover%2Fwoodcuts_7.jpg?table=block&id=388d07d5-d52d-435b-958e-7bdbfa36ece9&spaceId=a9cc7699-6a37-4c49-9be3-2ad26dc988b1&width=2000&userId=20d86116-606a-485a-9fd5-7acdd1aff393&cache=v2",
-    nodes: [
-      {
-        type: "paragraph",
-        value: "You can have paragraphs.",
-        id: nanoid(),
-      },
-      {
-        type: "ul",
-        value: "And lists",
-        id: nanoid(),
-      },
-    ],
+    nodes: [],
   },
-];
+};
 
 export const AppStateProvider: FC = ({ children }) => {
-  const [pages, setPages] = useState(initialState);
+  const [pages, setPages] = useState(initialPages);
+  const [nodes, setNodes] = useState<any>({});
 
-  const addPage = () => {
+  const addPage = (id: string) => {
     const page = {
-      id: nanoid(),
+      id,
       title: "Untitled",
       header:
         "https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fpage-cover%2Fwoodcuts_7.jpg?table=block&id=388d07d5-d52d-435b-958e-7bdbfa36ece9&spaceId=a9cc7699-6a37-4c49-9be3-2ad26dc988b1&width=2000&userId=20d86116-606a-485a-9fd5-7acdd1aff393&cache=v2",
-      nodes: [
-        {
-          type: "paragraph",
-          id: nanoid(),
-        },
-      ],
+      nodes: [],
     };
-    setPages((oldPages: any) => [...oldPages, page]);
+    setPages((oldPages: any) => ({ ...oldPages, [id]: page }));
     return page;
   };
 
   const addNode = (node: any, pageId: string, index: number) => {
-    setPages((oldPages) =>
-      oldPages.map((page) => {
-        if (page.id === pageId) {
-          return {
-            ...page,
-            nodes: [
-              ...page.nodes.slice(0, index + 1),
-              node,
-              ...page.nodes.slice(index + 1),
-            ],
-          };
-        } else {
-          return page;
-        }
-      })
-    );
+    setNodes((oldNodes: any) => ({ ...oldNodes, [node.id]: node }));
+    setPages((oldPages: any) => ({
+      ...oldPages,
+      [pageId]: {
+        ...oldPages[pageId],
+        nodes: [
+          ...oldPages[pageId].nodes.slice(0, index+1),
+          node.id,
+          ...oldPages[pageId].nodes.slice(index+1),
+        ],
+      },
+    }));
   };
 
   const removeNode = (node: any, pageId: string) => {
-    setPages((oldPages) =>
-      oldPages.map((page) => {
-        if (page.id === pageId) {
-          const index = page.nodes.indexOf(node);
-          return {
-            ...page,
-            nodes: [
-              ...page.nodes.slice(0, index),
-              ...page.nodes.slice(index + 1),
-            ],
-          };
-        } else {
-          return page;
-        }
-      })
-    );
+    setNodes((oldNodes: any) => {
+      const { [node.id]: _, ...newNodes } = oldNodes;
+      return newNodes;
+    });
+    setPages((oldPages: any) => ({
+      ...oldPages,
+      [pageId]: {
+        ...oldPages[pageId],
+        nodes: oldPages[pageId].nodes.filter(
+          (nodeId: any) => nodeId !== node.id
+        ),
+      },
+    }));
   };
 
-  const changeNodeType = (node: any, type: string, pageId: string) => {
-    setPages((oldPages) =>
-      oldPages.map((page) => {
-        if (page.id === pageId) {
-          return {
-            ...page,
-            nodes: page.nodes.map((pageNode) => {
-              if (pageNode.id === node.id) {
-                return { ...pageNode, type };
-              } else {
-                return pageNode;
-              }
-            }),
-          };
-        } else {
-          return page;
-        }
-      })
-    );
+  const changeNodeType = (node: any, type: string) => {
+    setNodes((oldNodes: any) => ({
+      ...oldNodes,
+      [node.id]: {
+        ...oldNodes[node.id],
+				value: "",
+        type,
+      },
+    }));
   };
 
-  const changeNodeValue = (node: any, value: string, pageId: string) => {
-    setPages((oldPages) =>
-      oldPages.map((page) => {
-        if (page.id === pageId) {
-          return {
-            ...page,
-            nodes: page.nodes.map((pageNode) => {
-              if (pageNode.id === node.id) {
-                return { ...pageNode, value };
-              } else {
-                return pageNode;
-              }
-            }),
-          };
-        } else {
-          return page;
-        }
-      })
-    );
+  const changeNodeValue = (node: any, value: string) => {
+    setNodes((oldNodes: any) => ({
+      ...oldNodes,
+      [node.id]: {
+        ...oldNodes[node.id],
+        value,
+      },
+    }));
   };
 
   console.log(pages);
+  console.log(nodes);
 
   return (
     <AppStateContext.Provider
       value={{
         pages,
+        nodes,
         addPage,
         addNode,
         removeNode,
