@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
 import { useRef } from "react";
+import { Navigate } from "react-router-dom";
 import { useMatch, useNavigate } from "react-router-dom";
+import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
 import { Node } from "./Node";
 
@@ -11,12 +13,15 @@ export const Page = () => {
     pages,
     nodes,
     addPage,
+    setPageNodes,
     addNode,
     removeNode,
     changeNodeType,
     changeNodeValue,
+    changePageTitle,
   } = useAppState();
   const page = match?.params?.id ? pages[match?.params?.id] : null;
+
   const nodeIdToFocusRef = useRef<any>(null);
   const nodesRef = useRef<any>({});
 
@@ -75,38 +80,61 @@ export const Page = () => {
   };
 
   return (
-    <div>
+    <>
       <img className="header-image" src={page.header} alt="Header" />
       <div className="title-container">
-        <h1 contentEditable suppressContentEditableWarning>
-          {page.title}
-        </h1>
+        <h1
+          className="title"
+          ref={(el) => {
+            if (el) {
+              el.textContent = page.title;
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onAddNode({ type: "paragraph", id: nanoid() }, 0);
+            }
+          }}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={(e) => changePageTitle(page, e.currentTarget.textContent)}
+        />
       </div>
       <div className="page-body">
-        {page.nodes.map((nodeId: any, index: number) => {
-          const node = nodes[nodeId];
-          return (
-            <Node
-              key={nodeId}
-              node={node}
-              index={index}
-              onAddNode={onAddNode}
-              handleNavigation={handleNavigation}
-              onChangeNodeType={onChangeNodeType}
-              onChangeNodeValue={onChangeNodeValue}
-              onRemoveNode={onRemoveNode}
-              refFunc={onRef(nodeId)}
-            />
-          );
-        })}
-        {!page.nodes.length && (
-          <div
-            onClick={() => onAddNode({ type: "paragraph", id: nanoid() }, 0)}
-          >
-            Click to create the first paragraph.
-          </div>
-        )}
+        <ReactSortable
+          animation={200}
+          list={page.nodes}
+          setList={setPageNodes(page.id)}
+					ghostClass="node-container-ghost"
+					dragClass="node-container-drag"
+        >
+          {page.nodes.map((nodeId: any, index: number) => {
+            const node = nodes[nodeId];
+            return (
+              <Node
+                key={nodeId}
+                node={node}
+                index={index}
+                onAddNode={onAddNode}
+                handleNavigation={handleNavigation}
+                onChangeNodeType={onChangeNodeType}
+                onChangeNodeValue={onChangeNodeValue}
+                onRemoveNode={onRemoveNode}
+                refFunc={onRef(nodeId)}
+              />
+            );
+          })}
+        </ReactSortable>
+        <div
+          className="page-spacer"
+          onClick={() =>
+            onAddNode({ type: "paragraph", id: nanoid() }, page.nodes.length)
+          }
+        >
+          {!page.nodes.length && "Click to create the first paragraph."}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

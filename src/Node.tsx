@@ -47,7 +47,7 @@ export const Node = ({
         event.target.textContent = "";
       } else {
         if (node.type === "paragraph" || event.target.textContent.length > 0) {
-          onAddNode({ type: node.type, value: "", id: nanoid() }, index);
+          onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
         } else {
           onChangeNodeType(node, "paragraph");
         }
@@ -82,16 +82,11 @@ export const Node = ({
 
   return (
     <div className="node-container">
+      <div className="node-drag-handle">⠿</div>
       {node.type === "page" ? (
-        <div
-          ref={(el) => {
-            if (el) {
-              el.textContent = pages[node.id].title;
-            }
-          }}
-          onClick={navigateToPage}
-          className={`node ${node.type}`}
-        />
+        <div onClick={navigateToPage} className={`node ${node.type}`}>
+          📄 {pages[node.id].title}
+        </div>
       ) : (
         <div
           data-placeholder="Type '/' for commands"
