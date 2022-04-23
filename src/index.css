@@ -32,25 +32,25 @@ body,
   display: flex;
   flex-direction: row;
   position: relative;
-	padding-left: 18px;
+  padding-left: 18px;
 }
 
 .node-container-ghost {
-	background-color: #c8ebfb;
-	overflow: hidden;
-	height: 4px;
+  background-color: #c8ebfb;
+  overflow: hidden;
+  height: 4px;
 }
 
-.node-container:hover .node-drag-handle {
-	opacity: 1;
+.node-drag-handle:hover {
+  opacity: 1;
 }
 
 .node-drag-handle {
-	padding: 6px;
-	cursor: grab;
-	font-weight: bold;
-	opacity: 0;
-	transition: opacity 0.2s ease-in-out;
+  padding: 6px;
+  cursor: grab;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .node {
@@ -118,4 +118,40 @@ body,
   width: 100%;
   padding: 0 6px;
   color: grey;
+}
+
+.command-panel {
+	z-index: 10;
+  position: absolute;
+  bottom: -10px;
+  left: 60px;
+  background: white;
+  width: 200px;
+	padding: 6px;
+  transform: translateY(100%);
+  border-radius: 4px;
+  box-shadow: rgb(15 15 15 / 10%) 0px 0px 0px 1px,
+    rgb(15 15 15 / 20%) 0px 3px 6px, rgb(15 15 15 / 40%) 0px 9px 24px;
+}
+
+.command-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+	width: 100%;
+}
+
+.command-panel ul li{
+	padding: 12px;
+	cursor: pointer;
+	border-radius: 4px;
+}
+
+.command-panel ul li:hover{
+	background-color: #f0f0f0;
+}
+
+.command-panel-title {
+  font-weight: bold;
+	padding: 12px;
 }

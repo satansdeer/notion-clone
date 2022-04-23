@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
-import { useRef } from "react";
-import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
@@ -21,32 +20,34 @@ export const Page = () => {
     changePageTitle,
   } = useAppState();
   const page = match?.params?.id ? pages[match?.params?.id] : null;
+  const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
 
-  const nodeIdToFocusRef = useRef<any>(null);
-  const nodesRef = useRef<any>({});
+  useEffect(() => {
+    const onKeyDown = (event: any) => {
+      if (event.key === "ArrowUp") {
+        setFocusedNodeIndex((index) => index - 1);
+      }
+      if (event.key === "ArrowDown") {
+        setFocusedNodeIndex((index) => index + 1);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
 
-  const onRef = (nodeId: any) => (el: any) => {
-    nodesRef.current[nodeId] = el;
-    if (nodeId === nodeIdToFocusRef.current) {
-      el?.focus();
-      nodeIdToFocusRef.current = null;
-    }
-  };
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const onAddNode = (node: any, index: number) => {
-    nodeIdToFocusRef.current = node.id;
     addNode(node, page.id, index);
     if (node.type === "page") {
       const page = addPage(node.id);
       history(`/${page.id}`);
     }
+    setFocusedNodeIndex(index);
   };
 
   const onRemoveNode = (node: any) => {
-    const index = nodes.indexOf(node);
     removeNode(node, page.id);
-    const nodeToFocus = nodes[index - 1];
-    nodesRef.current[nodeToFocus?.id]?.focus();
+    setFocusedNodeIndex((index) => index - 1);
   };
 
   const onChangeNodeType = (node: any, type: string) => {
@@ -59,24 +60,6 @@ export const Page = () => {
 
   const onChangeNodeValue = (node: any, value: string) => {
     changeNodeValue(node, value);
-  };
-
-  const handleNavigation = (node: any, direction: string) => {
-    if (direction === "up") {
-      const index = nodes.indexOf(node);
-      console.log(index);
-      if (index > 0) {
-        console.log(nodes[index - 1]);
-        console.log(nodesRef.current[nodes[index - 1].id]);
-        nodesRef.current[nodes[index - 1].id]?.focus();
-      }
-    }
-    if (direction === "down") {
-      const index = nodes.indexOf(node);
-      if (index < nodes.length - 1) {
-        nodesRef.current[nodes[index + 1].id]?.focus();
-      }
-    }
   };
 
   return (
@@ -104,24 +87,25 @@ export const Page = () => {
       <div className="page-body">
         <ReactSortable
           animation={200}
+          delay={100}
           list={page.nodes}
           setList={setPageNodes(page.id)}
-					ghostClass="node-container-ghost"
-					dragClass="node-container-drag"
+          ghostClass="node-container-ghost"
+          dragClass="node-container-drag"
         >
           {page.nodes.map((nodeId: any, index: number) => {
             const node = nodes[nodeId];
             return (
               <Node
                 key={nodeId}
+                isFocused={index === focusedNodeIndex}
+                onClick={() => setFocusedNodeIndex(index)}
                 node={node}
                 index={index}
                 onAddNode={onAddNode}
-                handleNavigation={handleNavigation}
                 onChangeNodeType={onChangeNodeType}
                 onChangeNodeValue={onChangeNodeValue}
                 onRemoveNode={onRemoveNode}
-                refFunc={onRef(nodeId)}
               />
             );
           })}

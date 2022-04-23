@@ -52,7 +52,7 @@ const initialNodes = {
 };
 
 export const AppStateProvider: FC = ({ children }) => {
-  const [pages, setPages] = useState(initialPages);
+  const [pages, setPages] = useState<any>(initialPages);
   const [nodes, setNodes] = useState<any>(initialNodes);
 
   const addPage = (id: string) => {

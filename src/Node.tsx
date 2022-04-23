@@ -1,19 +1,36 @@
 import { nanoid } from "nanoid";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppState } from "./AppStateContext";
+import { CommandPanel } from "./CommandPanel";
 
 export const Node = ({
   node,
-  refFunc,
+  onClick,
+  isFocused,
   onAddNode,
   onRemoveNode,
   onChangeNodeType,
   onChangeNodeValue,
-  handleNavigation,
   index,
 }: any) => {
+  const nodeRef = useRef<any>(null);
+  const [text, setText] = useState("");
   const { pages } = useAppState();
   const navigate = useNavigate();
+  const showCommandPanel = text.match(/^\//);
+
+  useEffect(() => {
+    if (isFocused) {
+      nodeRef.current.focus();
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (nodeRef.current) {
+      nodeRef.current.textContent = node.value;
+    }
+  }, [node?.value]);
 
   const parseCommand = (text: string) => {
     switch (text) {
@@ -57,49 +74,41 @@ export const Node = ({
       event.preventDefault();
       onRemoveNode(node);
     }
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      handleNavigation(node, "up");
-    }
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      handleNavigation(node, "down");
-    }
   };
 
   const navigateToPage = () => {
     navigate(`/${node.id}`);
   };
 
-  const handleFocus = ({ target }: any) => {
-    const range = document.createRange();
-    range.selectNodeContents(target);
-    range.collapse(false);
-    const selection = window.getSelection();
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+  const handleInput = ({ currentTarget }: any) => {
+    const { textContent } = currentTarget;
+    setText(textContent);
+    onChangeNodeValue(node, textContent);
   };
 
   return (
     <div className="node-container">
       <div className="node-drag-handle">⠿</div>
-      {node.type === "page" ? (
+      {showCommandPanel && (
+        <CommandPanel
+          selectItem={() => {
+            parseCommand(text);
+            setText("");
+          }}
+        />
+      )}
+      {node?.type === "page" ? (
         <div onClick={navigateToPage} className={`node ${node.type}`}>
           📄 {pages[node.id].title}
         </div>
       ) : (
         <div
           data-placeholder="Type '/' for commands"
-          ref={(el) => {
-            if (el) {
-              el.textContent = node.value;
-            }
-            refFunc(el);
-          }}
-          onFocus={handleFocus}
+          ref={nodeRef}
+          onClick={onClick}
           onKeyDown={onKeyDown}
-          onInput={(e) => onChangeNodeValue(node, e.currentTarget.textContent)}
-          contentEditable={node.type !== "page"}
+          onInput={handleInput}
+          contentEditable={true}
           suppressContentEditableWarning
           className={`node ${node.type}`}
         />
