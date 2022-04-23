@@ -11,7 +11,6 @@ export const Page = () => {
   const history = useNavigate();
   const {
     pages,
-    nodes,
     addPage,
     setPageNodes,
     addNode,
@@ -23,19 +22,23 @@ export const Page = () => {
   const page = match?.params?.id ? pages[match?.params?.id] : null;
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
 
+  console.log(focusedNodeIndex);
+
   useEffect(() => {
     const onKeyDown = (event: any) => {
       if (event.key === "ArrowUp") {
-        setFocusedNodeIndex((index) => index - 1);
+        setFocusedNodeIndex((index) => Math.max(index - 1, 0));
       }
       if (event.key === "ArrowDown") {
-        setFocusedNodeIndex((index) => index + 1);
+        setFocusedNodeIndex((index) =>
+          Math.min(index + 1, page?.nodes.length - 1)
+        );
       }
     };
     document.addEventListener("keydown", onKeyDown);
 
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [page]);
 
   const onAddNode = (node: any, index: number) => {
     addNode(node, page.id, index);
@@ -60,7 +63,7 @@ export const Page = () => {
   };
 
   const onChangeNodeValue = (node: any, value: string) => {
-    changeNodeValue(node, value);
+    changeNodeValue(node, value, page.id);
   };
 
   return (
@@ -82,14 +85,14 @@ export const Page = () => {
           ghostClass="node-container-ghost"
           dragClass="node-container-drag"
         >
-          {page.nodes.map((nodeId: any, index: number) => {
-            const node = nodes[nodeId];
+          {page.nodes.map((node: any, index: number) => {
             return (
               <Node
-                key={nodeId}
+                key={node.id}
                 isFocused={index === focusedNodeIndex}
                 onClick={() => setFocusedNodeIndex(index)}
                 node={node}
+                pageId={page.id}
                 index={index}
                 onAddNode={onAddNode}
                 onChangeNodeType={onChangeNodeType}

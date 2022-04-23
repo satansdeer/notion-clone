@@ -9,6 +9,7 @@ export const Node = ({
   onClick,
   isFocused,
   onAddNode,
+	pageId,
   onRemoveNode,
   onChangeNodeType,
   onChangeNodeValue,
@@ -57,6 +58,7 @@ export const Node = ({
   };
 
   const onKeyDown = (event: any) => {
+		console.log("onKeyDown enter", node.type, event.target.textContent[0]);
     if (event.key === "Enter") {
       event.preventDefault();
       if (event.target.textContent[0] === "/") {
@@ -64,6 +66,7 @@ export const Node = ({
         event.target.textContent = "";
       } else {
         if (node.type === "paragraph" || event.target.textContent.length > 0) {
+					console.log("Add node");
           onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
         } else {
           onChangeNodeType(node, "paragraph");
