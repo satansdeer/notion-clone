@@ -1,25 +1,13 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./Page";
-import { useState, useEffect } from "react";
-import { supabase } from "./supabaseClient";
 import Auth from "./Auth";
+import { Private } from "./Private";
 
 function App() {
-  const [session, setSession] = useState<any>(null);
-
-  useEffect(() => {
-    setSession(supabase.auth.session());
-
-    supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setSession(session);
-    });
-  }, []);
-
-  return !session ? (
-    <Auth />
-  ) : (
+  return (
     <Routes>
-      <Route path="/:id" element={<Page />} />
+      <Route path="/:id" element={<Private component={<Page/>}/>} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/" element={<Navigate to="/start" />} />
     </Routes>
   );

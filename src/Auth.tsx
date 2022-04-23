@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuthSession } from "./AuthSessionContext";
 import { supabase } from "./supabaseClient";
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const { session } = useAuthSession();
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
@@ -19,6 +22,10 @@ export default function Auth() {
       setLoading(false);
     }
   };
+
+	if(session){
+		return <Navigate to="/start"/>
+	}
 
   return (
     <div className="row flex flex-center">
