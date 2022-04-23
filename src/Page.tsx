@@ -4,6 +4,7 @@ import { useMatch, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
 import { Node } from "./Node";
+import { PageTitle } from "./PageTitle";
 
 export const Page = () => {
   const match = useMatch("/:id");
@@ -66,22 +67,10 @@ export const Page = () => {
     <>
       <img className="header-image" src={page.header} alt="Header" />
       <div className="title-container">
-        <h1
-          className="title"
-          ref={(el) => {
-            if (el) {
-              el.textContent = page.title;
-            }
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              onAddNode({ type: "paragraph", id: nanoid() }, 0);
-            }
-          }}
-          contentEditable
-          suppressContentEditableWarning
-          onInput={(e) => changePageTitle(page, e.currentTarget.textContent)}
+        <PageTitle
+          page={page}
+          onAddNode={onAddNode}
+          changePageTitle={changePageTitle}
         />
       </div>
       <div className="page-body">
