@@ -3,19 +3,20 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppState } from "./AppStateContext";
 import { CommandPanel } from "./CommandPanel";
+import { supabase } from "./supabaseClient";
 
 export const Node = ({
   node,
   onClick,
   isFocused,
   onAddNode,
-	pageId,
   onRemoveNode,
   onChangeNodeType,
   onChangeNodeValue,
   index,
 }: any) => {
   const nodeRef = useRef<any>(null);
+  const fileInputRef = useRef<any>(null);
   const [text, setText] = useState("");
   const { pages } = useAppState();
   const navigate = useNavigate();
@@ -51,6 +52,11 @@ export const Node = ({
         onChangeNodeType(node, "page");
         break;
       }
+      case "/image": {
+        fileInputRef.current.click();
+        onChangeNodeType(node, "image");
+        break;
+      }
       default: {
         break;
       }
@@ -58,7 +64,7 @@ export const Node = ({
   };
 
   const onKeyDown = (event: any) => {
-		console.log("onKeyDown enter", node.type, event.target.textContent[0]);
+    console.log("onKeyDown enter", node.type, event.target.textContent[0]);
     if (event.key === "Enter") {
       event.preventDefault();
       if (event.target.textContent[0] === "/") {
@@ -66,7 +72,7 @@ export const Node = ({
         event.target.textContent = "";
       } else {
         if (node.type === "paragraph" || event.target.textContent.length > 0) {
-					console.log("Add node");
+          console.log("Add node");
           onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
         } else {
           onChangeNodeType(node, "paragraph");
@@ -89,6 +95,51 @@ export const Node = ({
     onChangeNodeValue(node, textContent);
   };
 
+  const uploadImage = async (event: any) => {
+    try {
+      // setUploading(true)
+
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error("You must select an image to upload.");
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      let { error: uploadError } = await supabase.storage
+        .from("images")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: imageUrl, error } = await supabase.storage
+        .from("images")
+        .download(filePath);
+
+      if (error) {
+        throw error;
+      }
+
+      if (!imageUrl) {
+        return;
+      }
+
+      const url = URL.createObjectURL(imageUrl);
+      console.log(url);
+      onChangeNodeValue(node, { url, name: fileName });
+
+      // onUpload(filePath)
+    } catch (error) {
+      // alert(error.message)
+    } finally {
+      // setUploading(false)
+    }
+  };
+
   return (
     <div className="node-container">
       <div className="node-drag-handle">⠿</div>
@@ -100,11 +151,15 @@ export const Node = ({
           }}
         />
       )}
-      {node?.type === "page" ? (
+      {node?.type === "page" && (
         <div onClick={navigateToPage} className={`node ${node.type}`}>
           📄 {pages[node.id].title}
         </div>
-      ) : (
+      )}
+      {node?.type === "image" && (
+        <img src={node.value.url} alt={node.value.name} />
+      )}
+      {!["page", "image"].includes(node?.type) && (
         <div
           data-placeholder="Type '/' for commands"
           ref={nodeRef}
@@ -116,6 +171,12 @@ export const Node = ({
           className={`node ${node.type}`}
         />
       )}
+      <input
+        type="file"
+        style={{ display: "none" }}
+        ref={fileInputRef}
+        onChange={uploadImage}
+      />
     </div>
   );
 };
