@@ -6,7 +6,7 @@ export const PageTitle = ({ onAddNode, page, changePageTitle }: any) => {
 
   useEffect(() => {
     headerRef.current.textContent = page.title;
-  }, []);
+  }, [page]);
 
   return (
     // eslint-disable-next-line jsx-a11y/heading-has-content
@@ -16,12 +16,12 @@ export const PageTitle = ({ onAddNode, page, changePageTitle }: any) => {
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           event.preventDefault();
-          onAddNode({ type: "paragraph", id: nanoid() }, 0);
+          onAddNode({ type: "text", id: nanoid() }, 0);
         }
       }}
       contentEditable
       suppressContentEditableWarning
-      onInput={(e) => changePageTitle(page, e.currentTarget.textContent)}
+      onInput={(e) => changePageTitle(e.currentTarget.textContent)}
     />
   );
 };

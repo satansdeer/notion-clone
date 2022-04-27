@@ -1,28 +1,49 @@
 import { nanoid } from "nanoid";
-import { useEffect, useState } from "react";
-import { useMatch, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
 import { Node } from "./Node";
 import { PageTitle } from "./PageTitle";
+import { supabase } from "./supabaseClient";
+import { uploadImage } from "./uploadImage";
 
 export const Page = () => {
-  const match = useMatch("/:id");
   const history = useNavigate();
+  const fileInputRef = useRef<any>(null);
   const {
-    pages,
-    addPage,
+    page,
+    createPage,
     setPageNodes,
     addNode,
     removeNode,
     changeNodeType,
     changeNodeValue,
     changePageTitle,
+    changePageCover,
   } = useAppState();
-  const page = match?.params?.id ? pages[match?.params?.id] : null;
+
+	const [cover, setCover] = useState("");
+
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
 
-  console.log(focusedNodeIndex);
+  useEffect(() => {
+    const downloadImage = async (filePath: string) => {
+      const { data, error } = await supabase.storage
+        .from("images")
+        .download(filePath);
+      if (data) {
+        console.log("Downloaded image", data);
+        const url = URL.createObjectURL(data);
+				console.log("url", url);
+        setCover(url);
+      }
+    };
+		console.log(page)
+    if (page?.cover) {
+      downloadImage(page.cover);
+    }
+  }, [page]);
 
   useEffect(() => {
     const onKeyDown = (event: any) => {
@@ -41,24 +62,20 @@ export const Page = () => {
   }, [page]);
 
   const onAddNode = (node: any, index: number) => {
-    addNode(node, page.id, index);
-    if (node.type === "page") {
-      const page = addPage(node.id);
-      history(`/${page.id}`);
-    }
+    addNode(node, index);
     setFocusedNodeIndex(index);
   };
 
-  const onRemoveNode = (node: any) => {
-    removeNode(node, page.id);
+  const onRemoveNode = (node: any, index: number) => {
+    removeNode(node, page.id, index);
     setFocusedNodeIndex((index) => index - 1);
   };
 
-  const onChangeNodeType = (node: any, type: string) => {
+  const onChangeNodeType = async (node: any, type: string) => {
     changeNodeType(node, type, page.id);
     if (type === "page") {
-      const page = addPage(node.id);
-      history(`/${page.id}`);
+      const { slug } = await createPage();
+      changeNodeValue(node, slug);
     }
   };
 
@@ -66,9 +83,39 @@ export const Page = () => {
     changeNodeValue(node, value, page.id);
   };
 
+  const onChangeCoverImage = () => {
+    fileInputRef.current.click();
+  };
+
+  const onCoverImageUpload = async (event: any) => {
+    const result = await uploadImage(event);
+
+    changePageCover(result?.filePath);
+  };
+
+  if (!page) {
+    return null;
+  }
+
   return (
     <>
-      <img className="header-image" src={page.header} alt="Header" />
+      <div className="page-header">
+        <img
+          className="header-image"
+          src={cover || "/ztm-notes.png"}
+          alt="Cover"
+        />
+        <button className="page-header-button" onClick={onChangeCoverImage}>
+          Change cover
+        </button>
+
+        <input
+          type="file"
+          style={{ display: "none" }}
+          ref={fileInputRef}
+          onChange={onCoverImageUpload}
+        />
+      </div>
       <div className="title-container">
         <PageTitle
           page={page}
@@ -81,7 +128,7 @@ export const Page = () => {
           animation={200}
           delay={100}
           list={page.nodes}
-          setList={setPageNodes(page.id)}
+          setList={setPageNodes}
           ghostClass="node-container-ghost"
           dragClass="node-container-drag"
         >
@@ -105,7 +152,7 @@ export const Page = () => {
         <div
           className="page-spacer"
           onClick={() =>
-            onAddNode({ type: "paragraph", id: nanoid() }, page.nodes.length)
+            onAddNode({ type: "text", id: nanoid() }, page.nodes.length)
           }
         >
           {!page.nodes.length && "Click to create the first paragraph."}

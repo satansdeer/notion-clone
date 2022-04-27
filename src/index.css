@@ -28,6 +28,29 @@ body,
   color: grey;
 }
 
+.page-header {
+  position: relative;
+}
+
+.page-header-button {
+  position: absolute;
+  bottom: 20px;
+  right: 90px;
+  padding: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  background: white;
+  border: 2px solid #888;
+  border-radius: 4px;
+  color: #6f6f6f;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.page-header:hover .page-header-button {
+  opacity: 1;
+}
+
 .node-container {
   display: flex;
   flex-direction: row;
@@ -73,12 +96,12 @@ body,
   background-color: #f0f0f0;
 }
 
-.ul {
+.node.list {
   position: relative;
   padding-left: 20px;
 }
 
-.ul::after {
+.node.list::after {
   content: "";
   position: absolute;
   bottom: 50%;
@@ -90,7 +113,17 @@ body,
   transform: translateY(50%);
 }
 
-.h1 {
+node.header1 {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+node.header2 {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+node.header3 {
   font-size: 40px;
   font-weight: bold;
 }
@@ -102,7 +135,7 @@ body,
 }
 
 .page-body {
-  padding-left: 90px;
+  padding-left: 50px;
   padding-right: 90px;
   max-width: 900px;
 }

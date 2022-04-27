@@ -1,9 +1,9 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppState } from "./AppStateContext";
 import { CommandPanel } from "./CommandPanel";
 import { supabase } from "./supabaseClient";
+import { uploadImage } from "./uploadImage";
 
 export const Node = ({
   node,
@@ -18,13 +18,46 @@ export const Node = ({
   const nodeRef = useRef<any>(null);
   const fileInputRef = useRef<any>(null);
   const [text, setText] = useState("");
-  const { pages } = useAppState();
   const navigate = useNavigate();
   const showCommandPanel = text.match(/^\//);
+  const [pageTitle, setPageTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    // define an async functon that will download the image from supabase
+    const downloadImage = async (filePath: string) => {
+      const { data, error } = await supabase.storage
+        .from("images")
+        .download(filePath);
+      if (data) {
+        console.log("Downloaded image", data);
+        const url = URL.createObjectURL(data);
+        setImageUrl(url);
+      }
+    };
+    if (node.type === "image" && node.value.filePath) {
+      downloadImage(node?.value?.filePath);
+    }
+  }, [node.type, node.value]);
+
+  useEffect(() => {
+    // Define an async function that will fetch the page title
+    const fetchPageTitle = async () => {
+      const { data, error, status } = await supabase
+        .from("pages")
+        .select("title")
+        .eq("slug", node.value)
+        .single();
+      setPageTitle(data?.title);
+    };
+    if (node.type === "page" && node.value) {
+      fetchPageTitle();
+    }
+  }, [node.type, node.value]);
 
   useEffect(() => {
     if (isFocused) {
-      nodeRef.current.focus();
+      nodeRef.current?.focus();
     }
   }, [isFocused]);
 
@@ -37,15 +70,23 @@ export const Node = ({
   const parseCommand = (text: string) => {
     switch (text) {
       case "/text": {
-        onChangeNodeType(node, "paragraph");
+        onChangeNodeType(node, "text");
         break;
       }
       case "/list": {
-        onChangeNodeType(node, "ul");
+        onChangeNodeType(node, "list");
         break;
       }
       case "/heading1": {
-        onChangeNodeType(node, "h1");
+        onChangeNodeType(node, "heading1");
+        break;
+      }
+      case "/heading2": {
+        onChangeNodeType(node, "heading2");
+        break;
+      }
+      case "/heading3": {
+        onChangeNodeType(node, "heading3");
         break;
       }
       case "/page": {
@@ -64,29 +105,34 @@ export const Node = ({
   };
 
   const onKeyDown = (event: any) => {
-    console.log("onKeyDown enter", node.type, event.target.textContent[0]);
     if (event.key === "Enter") {
       event.preventDefault();
       if (event.target.textContent[0] === "/") {
         parseCommand(event.target.textContent);
         event.target.textContent = "";
       } else {
-        if (node.type === "paragraph" || event.target.textContent.length > 0) {
+        if (node.type === "text" || event.target.textContent.length > 0) {
           console.log("Add node");
           onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
         } else {
-          onChangeNodeType(node, "paragraph");
+          onChangeNodeType(node, "text");
         }
       }
     }
-    if (event.key === "Backspace" && event.target.textContent === "") {
-      event.preventDefault();
-      onRemoveNode(node);
+    if (event.key === "Backspace") {
+      console.log("Cursor position", window?.getSelection()?.anchorOffset);
+      if (event.target.textContent.length === 0) {
+        event.preventDefault();
+        onRemoveNode(node, index);
+      } else if (window?.getSelection()?.anchorOffset === 0) {
+        event.preventDefault();
+        onRemoveNode(node, index - 2);
+      }
     }
   };
 
   const navigateToPage = () => {
-    navigate(`/${node.id}`);
+    navigate(`/${node.value}`);
   };
 
   const handleInput = ({ currentTarget }: any) => {
@@ -95,43 +141,16 @@ export const Node = ({
     onChangeNodeValue(node, textContent);
   };
 
-  const uploadImage = async (event: any) => {
+  const onImageUpload = async (event: any) => {
     try {
       // setUploading(true)
 
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error("You must select an image to upload.");
-      }
+      const result = await uploadImage(event);
 
-      const file = event.target.files[0];
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      let { error: uploadError } = await supabase.storage
-        .from("images")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: imageUrl, error } = await supabase.storage
-        .from("images")
-        .download(filePath);
-
-      if (error) {
-        throw error;
-      }
-
-      if (!imageUrl) {
-        return;
-      }
-
-      const url = URL.createObjectURL(imageUrl);
-      console.log(url);
-      onChangeNodeValue(node, { url, name: fileName });
-
+      onChangeNodeValue(node, {
+        filePath: result?.filePath,
+        name: result?.fileName,
+      });
       // onUpload(filePath)
     } catch (error) {
       // alert(error.message)
@@ -153,12 +172,10 @@ export const Node = ({
       )}
       {node?.type === "page" && (
         <div onClick={navigateToPage} className={`node ${node.type}`}>
-          📄 {pages[node.id].title}
+          📄 {pageTitle}
         </div>
       )}
-      {node?.type === "image" && (
-        <img src={node.value.url} alt={node.value.name} />
-      )}
+      {node?.type === "image" && <img src={imageUrl} alt={node.value.name} />}
       {!["page", "image"].includes(node?.type) && (
         <div
           data-placeholder="Type '/' for commands"
@@ -175,7 +192,7 @@ export const Node = ({
         type="file"
         style={{ display: "none" }}
         ref={fileInputRef}
-        onChange={uploadImage}
+        onChange={onImageUpload}
       />
     </div>
   );
