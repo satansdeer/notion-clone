@@ -10,9 +10,12 @@ import { uploadImage } from "./uploadImage";
 export const Page = () => {
   const fileInputRef = useRef<any>(null);
   const {
-    page,
+    title,
+    nodes,
+    coverImage,
+		loading,
     createPage,
-    setPageNodes,
+    updateNodes,
     addNode,
     removeNode,
     changeNodeType,
@@ -21,7 +24,7 @@ export const Page = () => {
     changePageCover,
   } = useAppState();
 
-	const [cover, setCover] = useState("");
+  const [cover, setCover] = useState("");
 
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
 
@@ -33,15 +36,14 @@ export const Page = () => {
       if (data) {
         console.log("Downloaded image", data);
         const url = URL.createObjectURL(data);
-				console.log("url", url);
+        console.log("url", url);
         setCover(url);
       }
     };
-		console.log(page)
-    if (page?.cover) {
-      downloadImage(page.cover);
+    if (coverImage && coverImage) {
+      downloadImage(coverImage);
     }
-  }, [page]);
+  }, [coverImage]);
 
   useEffect(() => {
     const onKeyDown = (event: any) => {
@@ -49,28 +51,26 @@ export const Page = () => {
         setFocusedNodeIndex((index) => Math.max(index - 1, 0));
       }
       if (event.key === "ArrowDown") {
-        setFocusedNodeIndex((index) =>
-          Math.min(index + 1, page?.nodes.length - 1)
-        );
+        setFocusedNodeIndex((index) => Math.min(index + 1, nodes.length - 1));
       }
     };
     document.addEventListener("keydown", onKeyDown);
 
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [page]);
+  }, [nodes]);
 
   const onAddNode = (node: any, index: number) => {
     addNode(node, index);
     setFocusedNodeIndex(index);
   };
 
-  const onRemoveNode = (node: any, index: number) => {
-    removeNode(node, page.id, index);
+  const onRemoveNode = (node: any) => {
+    removeNode(node);
     setFocusedNodeIndex((index) => index - 1);
   };
 
   const onChangeNodeType = async (node: any, type: string) => {
-    changeNodeType(node, type, page.id);
+    changeNodeType(node, type);
     if (type === "page") {
       const { slug } = await createPage();
       changeNodeValue(node, slug);
@@ -78,7 +78,7 @@ export const Page = () => {
   };
 
   const onChangeNodeValue = (node: any, value: string) => {
-    changeNodeValue(node, value, page.id);
+    changeNodeValue(node, value);
   };
 
   const onChangeCoverImage = () => {
@@ -91,7 +91,7 @@ export const Page = () => {
     changePageCover(result?.filePath);
   };
 
-  if (!page) {
+  if (loading) {
     return null;
   }
 
@@ -116,7 +116,7 @@ export const Page = () => {
       </div>
       <div className="title-container">
         <PageTitle
-          page={page}
+          title={title}
           onAddNode={onAddNode}
           changePageTitle={changePageTitle}
         />
@@ -125,19 +125,18 @@ export const Page = () => {
         <ReactSortable
           animation={200}
           delay={100}
-          list={page.nodes}
-          setList={setPageNodes}
+          list={nodes}
+          setList={updateNodes}
           ghostClass="node-container-ghost"
           dragClass="node-container-drag"
         >
-          {page.nodes.map((node: any, index: number) => {
+          {nodes.map((node: any, index: number) => {
             return (
               <Node
                 key={node.id}
                 isFocused={index === focusedNodeIndex}
                 onClick={() => setFocusedNodeIndex(index)}
                 node={node}
-                pageId={page.id}
                 index={index}
                 onAddNode={onAddNode}
                 onChangeNodeType={onChangeNodeType}
@@ -150,10 +149,10 @@ export const Page = () => {
         <div
           className="page-spacer"
           onClick={() =>
-            onAddNode({ type: "text", id: nanoid() }, page.nodes.length)
+            onAddNode({ type: "text", id: nanoid() }, nodes.length)
           }
         >
-          {!page.nodes.length && "Click to create the first paragraph."}
+          {!nodes.length && "Click to create the first paragraph."}
         </div>
       </div>
     </>

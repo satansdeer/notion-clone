@@ -2,13 +2,16 @@ import { nanoid } from "nanoid";
 import {
   createContext,
   FC,
+  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { useMatch } from "react-router-dom";
+import { debounce } from "./debounce";
 import { supabase } from "./supabaseClient";
+import { useEvent } from "./useEvent";
 
 type AppStateContextType = {
   pages: any;
@@ -17,57 +20,19 @@ type AppStateContextType = {
 
 const AppStateContext = createContext<any>({} as AppStateContextType);
 
-const initialPages = {
-  start: {
-    id: "start",
-    title: "Notion App Clone",
-    header:
-      "https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fpage-cover%2Fwoodcuts_7.jpg?table=block&id=388d07d5-d52d-435b-958e-7bdbfa36ece9&spaceId=a9cc7699-6a37-4c49-9be3-2ad26dc988b1&width=2000&userId=20d86116-606a-485a-9fd5-7acdd1aff393&cache=v2",
-    nodes: [
-      {
-        type: "text",
-        id: "XUf1Pp9L9XAawIL2cv_jj",
-        value: "First paragraph",
-      },
-      {
-        type: "text",
-        value: "",
-        id: "MSYM45C4OKd4Z0iZZVeaJ",
-      },
-      {
-        type: "list",
-        value: "first item",
-        id: "cZAYIOrfoRfwogb0aNDTe",
-      },
-      {
-        type: "list",
-        value: "second item",
-        id: "rcBTfB6W1IJRzrqSw2U0c",
-      },
-      {
-        type: "list",
-        value: "third item",
-        id: "n7ihKVCNZCf1wfx_cr3Wh",
-      },
-    ],
-  },
-};
-const updatePage = async (page: any) => {
+const updatePage = debounce(async (page: any) => {
   if (!page) {
     return;
   }
-  const { error } = await supabase
-    .from("pages")
-    .update({
-      title: page.title,
-      nodes: page.nodes,
-    })
-    .eq("id", page.id);
-};
+  const { error } = await supabase.from("pages").update(page).eq("id", page.id);
+}, 500);
 
 export const AppStateProvider: FC = ({ children }) => {
-  const debounceTimer = useRef<any>(null);
-  const [page, setPage] = useState<any>(null);
+  const [loading, setLoading] = useState<any>(true);
+  const [pageId, setPageId] = useState<any>(null);
+  const [title, setTitle] = useState<any>(null);
+  const [nodes, setNodes] = useState<any>([]);
+  const [coverImage, setCoverImage] = useState<any>(null);
   const match = useMatch("/:slug");
   const pageSlug = match ? match.params.slug : "start";
   const user = supabase.auth.user();
@@ -80,20 +45,14 @@ export const AppStateProvider: FC = ({ children }) => {
         .eq("slug", pageSlug)
         .single();
 
-      setPage({
-        ...data,
-      });
+      setTitle(data?.title);
+      setCoverImage(data?.cover);
+      setNodes(data?.nodes);
+      setPageId(data?.id);
+      setLoading(false);
     };
     fetchPage();
   }, [pageSlug]);
-
-  useEffect(() => {
-    clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => updatePage(page), 1300);
-    return () => {
-      clearTimeout(debounceTimer.current);
-    };
-  }, [page]);
 
   const createPage = async () => {
     if (!user) {
@@ -114,49 +73,50 @@ export const AppStateProvider: FC = ({ children }) => {
     return page;
   };
 
-  const setPageNodes = (nodes: any) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
+  useEffect(() => {
+    if (!pageId || loading) {
+      return;
+    }
+
+		console.log("Updating page", pageId);
+    const page = {
+      id: pageId,
+      title,
       nodes,
-    }));
+      cover: coverImage,
+    };
+    updatePage(page);
+  }, [pageId, title, nodes, coverImage, loading]);
+
+  const updateNodes = (nodes: any) => {
+    setNodes(nodes);
   };
 
   const addNode = async (node: any, index: number) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
-      nodes: [
-        ...oldPage.nodes.slice(0, index),
-        node,
-        ...oldPage.nodes.slice(index),
-      ],
-    }));
+    updateNodes((oldNodes: any) => [
+      ...oldNodes.slice(0, index),
+      node,
+      ...oldNodes.slice(index),
+    ]);
   };
 
   const removeNode = async (nodeToRemove: any) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
-      nodes: oldPage.nodes.filter((node: any) => node.id !== nodeToRemove.id),
-    }));
+    updateNodes((oldPage: any) =>
+      oldPage.nodes.filter((node: any) => node.id !== nodeToRemove.id)
+    );
   };
 
   const changePageTitle = (title: string) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
-      title,
-    }));
+    setTitle(title);
   };
 
   const changePageCover = (cover: string) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
-      cover,
-    }));
+    setCoverImage(cover);
   };
 
   const changeNodeValue = async (node: any, value: string) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
-      nodes: oldPage.nodes.map((oldNode: any) => {
+    updateNodes((oldNodes: any) =>
+      oldNodes.map((oldNode: any) => {
         if (oldNode.id === node.id) {
           return {
             ...oldNode,
@@ -165,14 +125,13 @@ export const AppStateProvider: FC = ({ children }) => {
         } else {
           return oldNode;
         }
-      }),
-    }));
+      })
+    );
   };
 
   const changeNodeType = async (node: any, type: string) => {
-    setPage((oldPage: any) => ({
-      ...oldPage,
-      nodes: oldPage.nodes.map((oldNode: any) => {
+    updateNodes((oldNodes: any) =>
+      oldNodes.map((oldNode: any) => {
         if (oldNode.id === node.id) {
           return {
             ...oldNode,
@@ -181,22 +140,25 @@ export const AppStateProvider: FC = ({ children }) => {
         } else {
           return oldNode;
         }
-      }),
-    }));
+      })
+    );
   };
 
   return (
     <AppStateContext.Provider
       value={{
-        page,
+        title,
+        nodes,
+        coverImage,
+        loading,
         createPage,
-        setPageNodes,
+        updateNodes,
         addNode,
         removeNode,
         changeNodeType,
         changeNodeValue,
         changePageTitle,
-				changePageCover
+        changePageCover,
       }}
     >
       {children}

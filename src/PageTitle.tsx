@@ -1,12 +1,12 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
 
-export const PageTitle = ({ onAddNode, page, changePageTitle }: any) => {
+export const PageTitle = ({ onAddNode, title, changePageTitle }: any) => {
   const headerRef = useRef<any>(null);
 
   useEffect(() => {
-    headerRef.current.textContent = page.title;
-  }, [page]);
+    headerRef.current.textContent = title;
+  }, [title]);
 
   return (
     // eslint-disable-next-line jsx-a11y/heading-has-content

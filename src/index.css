@@ -188,6 +188,10 @@ node.header3 {
   background-color: #f0f0f0;
 }
 
+.command-panel ul li.selected {
+  background-color: #f0f0f0;
+}
+
 .command-panel-title {
   font-weight: bold;
   padding: 12px;
