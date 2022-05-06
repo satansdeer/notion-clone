@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
 import { Node } from "./Node";
@@ -9,7 +8,6 @@ import { supabase } from "./supabaseClient";
 import { uploadImage } from "./uploadImage";
 
 export const Page = () => {
-  const history = useNavigate();
   const fileInputRef = useRef<any>(null);
   const {
     page,

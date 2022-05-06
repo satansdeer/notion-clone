@@ -5,6 +5,16 @@ import { CommandPanel } from "./CommandPanel";
 import { supabase } from "./supabaseClient";
 import { uploadImage } from "./uploadImage";
 
+const supportedNodeTypes = [
+  { value: "text", name: "Text" },
+  { value: "image", name: "Image" },
+  { value: "list", name: "List" },
+  { value: "page", name: "Page" },
+  { value: "heading1", name: "Heading 1" },
+  { value: "heading2", name: "Heading 2" },
+  { value: "heading3", name: "Heading 3" },
+];
+
 export const Node = ({
   node,
   onClick,
@@ -24,7 +34,6 @@ export const Node = ({
   const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
-    // define an async functon that will download the image from supabase
     const downloadImage = async (filePath: string) => {
       const { data, error } = await supabase.storage
         .from("images")
@@ -41,7 +50,6 @@ export const Node = ({
   }, [node.type, node.value]);
 
   useEffect(() => {
-    // Define an async function that will fetch the page title
     const fetchPageTitle = async () => {
       const { data, error, status } = await supabase
         .from("pages")
@@ -68,39 +76,13 @@ export const Node = ({
   }, [node?.value]);
 
   const parseCommand = (text: string) => {
-    switch (text) {
-      case "/text": {
-        onChangeNodeType(node, "text");
-        break;
-      }
-      case "/list": {
-        onChangeNodeType(node, "list");
-        break;
-      }
-      case "/heading1": {
-        onChangeNodeType(node, "heading1");
-        break;
-      }
-      case "/heading2": {
-        onChangeNodeType(node, "heading2");
-        break;
-      }
-      case "/heading3": {
-        onChangeNodeType(node, "heading3");
-        break;
-      }
-      case "/page": {
-        onChangeNodeType(node, "page");
-        break;
-      }
-      case "/image": {
-        fileInputRef.current.click();
-        onChangeNodeType(node, "image");
-        break;
-      }
-      default: {
-        break;
-      }
+    const nodeType = text.replace(/^\//, "");
+    if (!supportedNodeTypes.find((type: any) => type.value === nodeType)) {
+      return;
+    }
+    onChangeNodeType(node, nodeType);
+    if (nodeType === "image") {
+      fileInputRef.current.click();
     }
   };
 
@@ -110,14 +92,14 @@ export const Node = ({
       if (event.target.textContent[0] === "/") {
         parseCommand(event.target.textContent);
         event.target.textContent = "";
-      } else {
-        if (node.type === "text" || event.target.textContent.length > 0) {
-          console.log("Add node");
-          onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
-        } else {
-          onChangeNodeType(node, "text");
-        }
+        return;
       }
+      if (node.type !== "text" && event.target.textContent.length === 0) {
+        onChangeNodeType(node, "text");
+        return;
+      }
+      console.log("Add node");
+      onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
     }
     if (event.key === "Backspace") {
       console.log("Cursor position", window?.getSelection()?.anchorOffset);
@@ -168,6 +150,7 @@ export const Node = ({
             parseCommand(text);
             setText("");
           }}
+          supportedNodeTypes={supportedNodeTypes}
         />
       )}
       {node?.type === "page" && (
