@@ -1,23 +1,34 @@
 import { useEffect, useState } from "react";
 
-export const CommandPanel = ({ selectItem, supportedNodeTypes }: any) => {
+export const CommandPanel = ({
+  selectItem,
+  supportedNodeTypes,
+  nodeText,
+}: any) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
 
   useEffect(() => {
-    const onKeyDown = (event: any) => {
-      if (event.key === "ArrowUp") {
-        setSelectedItemIndex((index) => Math.max(index - 1, 0));
-      }
-      if (event.key === "ArrowDown") {
-        setSelectedItemIndex((index) =>
-          Math.min(index + 1, supportedNodeTypes.length - 1)
-        );
+    const handleKeyDown = (event: any) => {
+      if (event.key === "Enter") {
+        selectItem(supportedNodeTypes[selectedItemIndex]);
       }
     };
-    document.addEventListener("keydown", onKeyDown);
 
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [supportedNodeTypes]);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedItemIndex]);
+
+  useEffect(() => {
+    const normalizedValue = nodeText.toLowerCase().replace(/\//g, "");
+    setSelectedItemIndex(
+      supportedNodeTypes.findIndex((item: any) =>
+        item.value.match(normalizedValue)
+      )
+    );
+  }, [nodeText, supportedNodeTypes]);
 
   return (
     <div className="command-panel">

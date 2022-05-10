@@ -27,9 +27,8 @@ export const Node = ({
 }: any) => {
   const nodeRef = useRef<any>(null);
   const fileInputRef = useRef<any>(null);
-  const [text, setText] = useState("");
   const navigate = useNavigate();
-  const showCommandPanel = text.match(/^\//);
+  const showCommandPanel = isFocused && node.value.match(/^\//);
   const [pageTitle, setPageTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
@@ -75,11 +74,11 @@ export const Node = ({
     }
   }, [node?.value]);
 
-  const parseCommand = (text: string) => {
-    const nodeType = text.replace(/^\//, "");
+  const parseCommand = (nodeType: string) => {
     if (!supportedNodeTypes.find((type: any) => type.value === nodeType)) {
       return;
     }
+		onChangeNodeValue(node, "")
     onChangeNodeType(node, nodeType);
     if (nodeType === "image") {
       fileInputRef.current.click();
@@ -90,19 +89,15 @@ export const Node = ({
     if (event.key === "Enter") {
       event.preventDefault();
       if (event.target.textContent[0] === "/") {
-        parseCommand(event.target.textContent);
-        event.target.textContent = "";
         return;
       }
       if (node.type !== "text" && event.target.textContent.length === 0) {
         onChangeNodeType(node, "text");
         return;
       }
-      console.log("Add node");
       onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
     }
     if (event.key === "Backspace") {
-      console.log("Cursor position", window?.getSelection()?.anchorOffset);
       if (event.target.textContent.length === 0) {
         event.preventDefault();
         onRemoveNode(node, index);
@@ -119,7 +114,6 @@ export const Node = ({
 
   const handleInput = ({ currentTarget }: any) => {
     const { textContent } = currentTarget;
-    setText(textContent);
     onChangeNodeValue(node, textContent);
   };
 
@@ -146,10 +140,10 @@ export const Node = ({
       <div className="node-drag-handle">⠿</div>
       {showCommandPanel && (
         <CommandPanel
-          selectItem={() => {
-            parseCommand(text);
-            setText("");
+          selectItem={({ value }: any) => {
+            parseCommand(value);
           }}
+          nodeText={node.value}
           supportedNodeTypes={supportedNodeTypes}
         />
       )}

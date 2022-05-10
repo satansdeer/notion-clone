@@ -77,8 +77,6 @@ export const AppStateProvider: FC = ({ children }) => {
     if (!pageId || loading) {
       return;
     }
-
-		console.log("Updating page", pageId);
     const page = {
       id: pageId,
       title,
@@ -101,8 +99,8 @@ export const AppStateProvider: FC = ({ children }) => {
   };
 
   const removeNode = async (nodeToRemove: any) => {
-    updateNodes((oldPage: any) =>
-      oldPage.nodes.filter((node: any) => node.id !== nodeToRemove.id)
+    updateNodes((oldNodes: any) =>
+      oldNodes.filter((node: any) => node.id !== nodeToRemove.id)
     );
   };
 
@@ -130,6 +128,7 @@ export const AppStateProvider: FC = ({ children }) => {
   };
 
   const changeNodeType = async (node: any, type: string) => {
+		console.log("changeNodeType", node, type)
     updateNodes((oldNodes: any) =>
       oldNodes.map((oldNode: any) => {
         if (oldNode.id === node.id) {
