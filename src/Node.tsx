@@ -29,7 +29,7 @@ export const Node = ({
   const fileInputRef = useRef<any>(null);
   const navigate = useNavigate();
   const showCommandPanel =
-    isFocused && node.type === "text" && node?.value?.match(/^\//);
+    isFocused && node?.value?.match(/^\//);
   const [pageTitle, setPageTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
@@ -141,9 +141,7 @@ export const Node = ({
       <div className="node-drag-handle">⠿</div>
       {showCommandPanel && (
         <CommandPanel
-          selectItem={({ value }: any) => {
-            parseCommand(value);
-          }}
+          selectItem={parseCommand}
           nodeText={node.value}
           supportedNodeTypes={supportedNodeTypes}
         />

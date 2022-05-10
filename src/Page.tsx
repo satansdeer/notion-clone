@@ -1,9 +1,8 @@
-import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
 import { CoverImage } from "./CoverImage";
-import { Node } from "./Node";
+import { NodeContainer } from "./Node/NodeContainer";
 import { PageSpacer } from "./PageSpacer";
 import { PageTitle } from "./PageTitle";
 
@@ -13,12 +12,7 @@ export const Page = () => {
     nodes,
     coverImage,
     loading,
-    createPage,
     updateNodes,
-    addNode,
-    removeNode,
-    changeNodeType,
-    changeNodeValue,
     changePageTitle,
     changePageCover,
   } = useAppState();
@@ -39,42 +33,28 @@ export const Page = () => {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [nodes]);
 
-  const onAddNode = (node: any, index: number) => {
-    addNode(node, index);
-    setFocusedNodeIndex(index);
-  };
+  // const onAddNode = (node: any, index: number) => {
+  //   addNode(node, index);
+  //   setFocusedNodeIndex(index);
+  // };
 
-  const onRemoveNode = (node: any) => {
-    removeNode(node);
-    setFocusedNodeIndex((index) => index - 1);
-  };
+  // const onRemoveNode = (node: any) => {
+  //   removeNode(node);
+  //   setFocusedNodeIndex((index) => index - 1);
+  // };
 
-  const onChangeNodeType = async (node: any, type: string) => {
-    changeNodeType(node, type);
-    if (type === "page") {
-      const { slug } = await createPage();
-      changeNodeValue(node, slug);
-    }
-  };
-
-  const onChangeNodeValue = (node: any, value: string) => {
-    changeNodeValue(node, value);
-  };
+  // const onChangeNodeType = async (node: any, type: string) => {
+  //   changeNodeType(node, type);
+  // };
 
   if (loading) {
-    return null;
+    return <>Loading...</>;
   }
 
   return (
     <>
       <CoverImage filePath={coverImage} changePageCover={changePageCover} />
-      <div className="title-container">
-        <PageTitle
-          title={title}
-          onAddNode={onAddNode}
-          changePageTitle={changePageTitle}
-        />
-      </div>
+      <PageTitle title={title} changePageTitle={changePageTitle} />
       <div className="page-body">
         <ReactSortable
           animation={200}
@@ -86,24 +66,18 @@ export const Page = () => {
         >
           {nodes.map((node: any, index: number) => {
             return (
-              <Node
+              <NodeContainer
                 key={node.id}
                 isFocused={index === focusedNodeIndex}
-                onClick={() => setFocusedNodeIndex(index)}
+                updateFocusedIndex={setFocusedNodeIndex}
                 node={node}
                 index={index}
-                onAddNode={onAddNode}
-                onChangeNodeType={onChangeNodeType}
-                onChangeNodeValue={onChangeNodeValue}
-                onRemoveNode={onRemoveNode}
               />
             );
           })}
         </ReactSortable>
         <PageSpacer
-          onClick={() => {
-            onAddNode({ type: "text", id: nanoid() }, nodes.length);
-          }}
+          updateFocusedIndex={setFocusedNodeIndex}
           showHint={!nodes.length}
         />
       </div>

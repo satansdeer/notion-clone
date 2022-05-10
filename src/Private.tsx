@@ -4,7 +4,7 @@ import { useAuthSession } from "./AuthSessionContext";
 export const Private = ({ component }: any) => {
   const { session, loading } = useAuthSession();
 	if (loading) {
-		return <>Loading...</>;
+		return <>Authenticating...</>;
 	}
 
   return session ? component : <Navigate to="/auth" />;

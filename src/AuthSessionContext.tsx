@@ -8,13 +8,12 @@ export const AuthSessionProvider = ({ children }: any) => {
   const [loading, setLoading] = useState<any>(true);
 
   useEffect(() => {
-    if (supabase.auth.session()) {
-      setSession(supabase.auth.session());
-      setLoading(false);
-    }
+    setSession(supabase.auth.session());
+    setLoading(false);
 
     supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setSession(session);
+      setLoading(false);
     });
   }, []);
 

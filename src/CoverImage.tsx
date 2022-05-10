@@ -19,7 +19,7 @@ export const CoverImage = ({filePath, changePageCover}: any) => {
 
   useEffect(() => {
     const downloadImage = async (filePath: string) => {
-      const { data, error } = await supabase.storage
+      const { data } = await supabase.storage
         .from("images")
         .download(filePath);
       if (data) {
@@ -29,6 +29,7 @@ export const CoverImage = ({filePath, changePageCover}: any) => {
         setCover(url);
       }
     };
+		setCover("");
     if (filePath) {
       downloadImage(filePath);
     }

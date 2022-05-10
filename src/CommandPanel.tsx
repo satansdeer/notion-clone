@@ -12,7 +12,7 @@ export const CommandPanel = ({
   useEffect(() => {
     const handleKeyDown = (event: any) => {
       if (event.key === "Enter") {
-        selectItem(supportedNodeTypes[selectedItemIndex]);
+        selectItem(supportedNodeTypes[selectedItemIndex].value);
       }
     };
 

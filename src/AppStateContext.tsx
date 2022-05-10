@@ -1,17 +1,8 @@
 import { nanoid } from "nanoid";
-import {
-  createContext,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, FC, useContext, useEffect, useState } from "react";
 import { useMatch } from "react-router-dom";
 import { debounce } from "./debounce";
 import { supabase } from "./supabaseClient";
-import { useEvent } from "./useEvent";
 
 type AppStateContextType = {
   pages: any;
@@ -39,7 +30,7 @@ export const AppStateProvider: FC = ({ children }) => {
 
   useEffect(() => {
     const fetchPage = async () => {
-      const { data, error, status } = await supabase
+      const { data } = await supabase
         .from("pages")
         .select(`title, id, cover, nodes`)
         .eq("slug", pageSlug)
@@ -98,10 +89,11 @@ export const AppStateProvider: FC = ({ children }) => {
     ]);
   };
 
-  const removeNode = async (nodeToRemove: any) => {
-    updateNodes((oldNodes: any) =>
-      oldNodes.filter((node: any) => node.id !== nodeToRemove.id)
-    );
+  const removeNodeByIndex = async (nodeIndex: any) => {
+    updateNodes((oldNodes: any) => [
+      ...oldNodes.slice(0, nodeIndex),
+      ...oldNodes.slice(nodeIndex + 1),
+    ]);
   };
 
   const changePageTitle = (title: string) => {
@@ -128,7 +120,13 @@ export const AppStateProvider: FC = ({ children }) => {
   };
 
   const changeNodeType = async (node: any, type: string) => {
-		console.log("changeNodeType", node, type)
+    console.log("changeNodeType", node, type);
+    if (type === "page") {
+      const newPage = await createPage();
+      if (newPage) {
+        changeNodeValue(node, newPage.slug);
+      }
+    }
     updateNodes((oldNodes: any) =>
       oldNodes.map((oldNode: any) => {
         if (oldNode.id === node.id) {
@@ -153,7 +151,7 @@ export const AppStateProvider: FC = ({ children }) => {
         createPage,
         updateNodes,
         addNode,
-        removeNode,
+        removeNodeByIndex,
         changeNodeType,
         changeNodeValue,
         changePageTitle,
