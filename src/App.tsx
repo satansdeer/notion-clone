@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { Page } from "./Page";
 import Auth from "./Auth";
 import { Private } from "./Private";
@@ -7,6 +7,7 @@ import { AppStateProvider } from "./AppStateContext";
 function App() {
   return (
     <Routes>
+      <Route path="/auth" element={<Auth />} />
       <Route
         path="/:id"
         element={
@@ -19,8 +20,18 @@ function App() {
           />
         }
       />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/" element={<Navigate to="/start" />} />
+      <Route
+        path="/"
+        element={
+          <Private
+            component={
+              <AppStateProvider>
+                <Page />
+              </AppStateProvider>
+            }
+          />
+        }
+      />
     </Routes>
   );
 }
