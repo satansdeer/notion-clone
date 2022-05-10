@@ -4,6 +4,7 @@ import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
 import { CoverImage } from "./CoverImage";
 import { Node } from "./Node";
+import { PageSpacer } from "./PageSpacer";
 import { PageTitle } from "./PageTitle";
 
 export const Page = () => {
@@ -99,14 +100,12 @@ export const Page = () => {
             );
           })}
         </ReactSortable>
-        <div
-          className="page-spacer"
-          onClick={() =>
-            onAddNode({ type: "text", id: nanoid() }, nodes.length)
-          }
-        >
-          {!nodes.length && "Click to create the first paragraph."}
-        </div>
+        <PageSpacer
+          onClick={() => {
+            onAddNode({ type: "text", id: nanoid() }, nodes.length);
+          }}
+          showHint={!nodes.length}
+        />
       </div>
     </>
   );
