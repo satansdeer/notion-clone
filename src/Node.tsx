@@ -28,7 +28,8 @@ export const Node = ({
   const nodeRef = useRef<any>(null);
   const fileInputRef = useRef<any>(null);
   const navigate = useNavigate();
-  const showCommandPanel = isFocused && node.value.match(/^\//);
+  const showCommandPanel =
+    isFocused && node.type === "text" && node?.value?.match(/^\//);
   const [pageTitle, setPageTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
@@ -78,7 +79,7 @@ export const Node = ({
     if (!supportedNodeTypes.find((type: any) => type.value === nodeType)) {
       return;
     }
-		onChangeNodeValue(node, "")
+    onChangeNodeValue(node, "");
     onChangeNodeType(node, nodeType);
     if (nodeType === "image") {
       fileInputRef.current.click();
@@ -95,7 +96,7 @@ export const Node = ({
         onChangeNodeType(node, "text");
         return;
       }
-      onAddNode({ type: node.type, value: "", id: nanoid() }, index + 1);
+      onAddNode({ type: "text", value: "", id: nanoid() }, index + 1);
     }
     if (event.key === "Backspace") {
       if (event.target.textContent.length === 0) {
@@ -155,7 +156,7 @@ export const Node = ({
       {node?.type === "image" && <img src={imageUrl} alt={node.value.name} />}
       {!["page", "image"].includes(node?.type) && (
         <div
-          data-placeholder="Type '/' for commands"
+          data-placeholder={node.type === "text" ? "Type '/' for commands" : ""}
           ref={nodeRef}
           onClick={onClick}
           onKeyDown={onKeyDown}

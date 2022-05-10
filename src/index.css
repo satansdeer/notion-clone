@@ -113,18 +113,18 @@ body,
   transform: translateY(50%);
 }
 
-node.header1 {
+.node.heading1 {
   font-size: 40px;
   font-weight: bold;
 }
 
-node.header2 {
-  font-size: 40px;
+.node.heading2 {
+  font-size: 30px;
   font-weight: bold;
 }
 
-node.header3 {
-  font-size: 40px;
+.node.heading3 {
+  font-size: 20px;
   font-weight: bold;
 }
 
@@ -169,6 +169,10 @@ node.header3 {
   border-radius: 4px;
   box-shadow: rgb(15 15 15 / 10%) 0px 0px 0px 1px,
     rgb(15 15 15 / 20%) 0px 3px 6px, rgb(15 15 15 / 40%) 0px 9px 24px;
+}
+
+.command-panel.reverse {
+	transform: translateY(-50px);
 }
 
 .command-panel ul {

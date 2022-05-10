@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useOverflowsScreenBottom } from "./useOverflowsScreenBottom";
 
 export const CommandPanel = ({
   selectItem,
@@ -6,6 +7,7 @@ export const CommandPanel = ({
   nodeText,
 }: any) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const { overflows, ref } = useOverflowsScreenBottom();
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -31,7 +33,7 @@ export const CommandPanel = ({
   }, [nodeText, supportedNodeTypes]);
 
   return (
-    <div className="command-panel">
+    <div ref={ref} className={`command-panel ${overflows ? "reverse" : ""}`}>
       <div className="command-panel-title">Blocks</div>
       <ul>
         {supportedNodeTypes.map((type: any, index: number) => {
