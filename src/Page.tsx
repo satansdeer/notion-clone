@@ -1,19 +1,17 @@
 import { nanoid } from "nanoid";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
 import { useAppState } from "./AppStateContext";
+import { CoverImage } from "./CoverImage";
 import { Node } from "./Node";
 import { PageTitle } from "./PageTitle";
-import { supabase } from "./supabaseClient";
-import { uploadImage } from "./uploadImage";
 
 export const Page = () => {
-  const fileInputRef = useRef<any>(null);
   const {
     title,
     nodes,
     coverImage,
-		loading,
+    loading,
     createPage,
     updateNodes,
     addNode,
@@ -24,26 +22,7 @@ export const Page = () => {
     changePageCover,
   } = useAppState();
 
-  const [cover, setCover] = useState("");
-
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
-
-  useEffect(() => {
-    const downloadImage = async (filePath: string) => {
-      const { data, error } = await supabase.storage
-        .from("images")
-        .download(filePath);
-      if (data) {
-        console.log("Downloaded image", data);
-        const url = URL.createObjectURL(data);
-        console.log("url", url);
-        setCover(url);
-      }
-    };
-    if (coverImage && coverImage) {
-      downloadImage(coverImage);
-    }
-  }, [coverImage]);
 
   useEffect(() => {
     const onKeyDown = (event: any) => {
@@ -81,39 +60,13 @@ export const Page = () => {
     changeNodeValue(node, value);
   };
 
-  const onChangeCoverImage = () => {
-    fileInputRef.current.click();
-  };
-
-  const onCoverImageUpload = async (event: any) => {
-    const result = await uploadImage(event);
-
-    changePageCover(result?.filePath);
-  };
-
   if (loading) {
     return null;
   }
 
   return (
     <>
-      <div className="page-header">
-        <img
-          className="header-image"
-          src={cover || "/ztm-notes.png"}
-          alt="Cover"
-        />
-        <button className="page-header-button" onClick={onChangeCoverImage}>
-          Change cover
-        </button>
-
-        <input
-          type="file"
-          style={{ display: "none" }}
-          ref={fileInputRef}
-          onChange={onCoverImageUpload}
-        />
-      </div>
+      <CoverImage filePath={coverImage} changePageCover={changePageCover} />
       <div className="title-container">
         <PageTitle
           title={title}
