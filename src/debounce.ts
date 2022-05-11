@@ -4,6 +4,6 @@ export function debounce<TCallback extends Function>(callback: TCallback, delay 
   let timeoutId: ReturnType<typeof setTimeout>;
   return function (...args: ArgumentTypes<TCallback>) {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => callback(args), delay);
+    timeoutId = setTimeout(() => callback(...args), delay);
   };
 }

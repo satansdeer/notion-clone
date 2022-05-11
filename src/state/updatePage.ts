@@ -7,6 +7,7 @@ export const updatePage = debounce(
     if (!page) {
       return;
     }
+		console.log("updatePage", page)
     const { error } = await supabase
       .from("pages")
       .update(page)
