@@ -2,7 +2,7 @@ import { BasicNode } from "./BasicNode";
 import { ImageNode } from "./ImageNode";
 import { PageNode } from "./PageNode";
 import { SwitchNode } from "./SwitchNode";
-import { NodeData } from "../AppStateContext";
+import { NodeData } from "../state/AppStateContext";
 
 type NodeContainerProps = {
 	node: NodeData;

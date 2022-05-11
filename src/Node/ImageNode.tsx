@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NodeData, NodeType, useAppState } from "../AppStateContext";
+import { NodeData, NodeType, useAppState } from "../state/AppStateContext";
 import { supabase } from "../supabaseClient";
 import { uploadImage } from "../uploadImage";
 

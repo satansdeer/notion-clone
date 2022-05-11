@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
-import { useAppState } from "../AppStateContext";
+import { useAppState } from "../state/AppStateContext";
 import { CoverImage } from "./CoverImage";
 import { NodeContainer } from "../Node/NodeContainer";
 import { PageSpacer } from "./PageSpacer";
@@ -15,8 +15,8 @@ export const Page = () => {
     loading,
     addNode,
     setNodes,
-    changePageTitle,
-    changePageCover,
+    setTitle,
+    setCoverImage,
   } = useAppState();
 
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
@@ -41,8 +41,8 @@ export const Page = () => {
 
   return (
     <>
-      <CoverImage filePath={coverImage} changePageCover={changePageCover} />
-      <PageTitle title={title} changePageTitle={changePageTitle} />
+      <CoverImage filePath={coverImage} changePageCover={setCoverImage} />
+      <PageTitle title={title} changePageTitle={setTitle} />
       <div className="page-body">
         <ReactSortable
           animation={200}

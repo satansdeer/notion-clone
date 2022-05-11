@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { NodeData, NodeType } from "../AppStateContext";
+import { NodeData, NodeType } from "../state/AppStateContext";
 import { supabase } from "../supabaseClient";
 
 type PageNodeProps = {

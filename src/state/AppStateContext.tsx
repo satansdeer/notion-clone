@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import { useMatch } from "react-router-dom";
-import { debounce } from "./debounce";
-import { supabase } from "./supabaseClient";
+import { debounce } from "../debounce";
+import { supabase } from "../supabaseClient";
+import { useNodesState } from "./useNodesState";
 
 type AppStateContextType = {
   title?: string;
@@ -15,8 +16,8 @@ type AppStateContextType = {
   removeNodeByIndex: any;
   changeNodeType: any;
   changeNodeValue: any;
-  changePageTitle: any;
-  changePageCover: any;
+  setTitle: any;
+  setCoverImage: any;
 };
 
 export type NodeType =
@@ -34,7 +35,7 @@ export type NodeData = {
   value: string;
 };
 
-type Page = {
+export type Page = {
   id: string;
   slug: string;
   title: string;
@@ -57,8 +58,9 @@ export const AppStateProvider: FC = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [pageId, setPageId] = useState<string>();
   const [title, setTitle] = useState<string>();
-  const [nodes, setNodes] = useState<NodeData[]>([]);
   const [coverImage, setCoverImage] = useState<string>();
+  const { nodes, setNodes, addNode, removeNodeByIndex, updateNode } =
+    useNodesState();
   const match = useMatch("/:slug");
   const pageSlug = match ? match.params.slug : "start";
   const user = supabase.auth.user();
@@ -112,64 +114,12 @@ export const AppStateProvider: FC = ({ children }) => {
     updatePage(page);
   }, [pageId, title, nodes, coverImage, loading]);
 
-  const addNode = async (node: NodeData, index: number) => {
-    setNodes((oldNodes) => [
-      ...oldNodes.slice(0, index),
-      node,
-      ...oldNodes.slice(index),
-    ]);
+  const changeNodeType = (node: NodeData, type: NodeType) => {
+    updateNode(node, { type });
   };
 
-  const removeNodeByIndex = async (nodeIndex: number) => {
-    setNodes((oldNodes) => [
-      ...oldNodes.slice(0, nodeIndex),
-      ...oldNodes.slice(nodeIndex + 1),
-    ]);
-  };
-
-  const changePageTitle = (title: string) => {
-    setTitle(title);
-  };
-
-  const changePageCover = (cover: string) => {
-    setCoverImage(cover);
-  };
-
-  const changeNodeValue = async (node: NodeData, value: string) => {
-    console.log("changeNodeValue", node, value);
-    setNodes((oldNodes) =>
-      oldNodes.map((oldNode) => {
-        if (oldNode.id === node.id) {
-          return {
-            ...oldNode,
-            value,
-          };
-        } else {
-          return oldNode;
-        }
-      })
-    );
-  };
-
-  const changeNodeType = async (node: NodeData, type: NodeType) => {
-    if (type === "page") {
-      const newPage = await createPage();
-      if (newPage) {
-        changeNodeValue(node, newPage.slug);
-      }
-    }
-    setNodes((oldNodes) =>
-      oldNodes.map((oldNode) => {
-        if (oldNode.id === node.id) {
-          return {
-            ...oldNode,
-            type,
-          };
-        } else {
-          return oldNode;
-        }
-      })
-    );
+  const changeNodeValue = (node: NodeData, value: string) => {
+    updateNode(node, { value });
   };
 
   return (
@@ -185,8 +135,8 @@ export const AppStateProvider: FC = ({ children }) => {
         removeNodeByIndex,
         changeNodeType,
         changeNodeValue,
-        changePageTitle,
-        changePageCover,
+        setTitle,
+        setCoverImage,
       }}
     >
       {children}

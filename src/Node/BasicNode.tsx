@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
-import { NodeData, NodeType, useAppState } from "../AppStateContext";
+import { NodeData, NodeType, useAppState } from "../state/AppStateContext";
 import { CommandPanel } from "./CommandPanel";
 
 export type SupportedNodeType = {
