@@ -1,6 +1,11 @@
+import { KeyboardEvent, FormEvent } from "react";
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
-import { NodeData, NodeType, useAppState } from "../state/AppStateContext";
+import {
+  NodeData,
+  NodeType,
+  useNodesContext,
+} from "../state/AppStateContext";
 import { CommandPanel } from "./CommandPanel";
 
 export type SupportedNodeType = {
@@ -8,22 +13,12 @@ export type SupportedNodeType = {
   name: string;
 };
 
-const supportedNodeTypes: SupportedNodeType[] = [
-  { value: "text", name: "Text" },
-  { value: "image", name: "Image" },
-  { value: "list", name: "List" },
-  { value: "page", name: "Page" },
-  { value: "heading1", name: "Heading 1" },
-  { value: "heading2", name: "Heading 2" },
-  { value: "heading3", name: "Heading 3" },
-];
-
 interface BasicNodeProps {
-	node: NodeData;
-	updateFocusedIndex(index: number): void
-	isFocused: boolean
-	index: number
-	supportedTypes: NodeType[]
+  node: NodeData;
+  updateFocusedIndex(index: number): void;
+  isFocused: boolean;
+  index: number;
+  supportedTypes: NodeType[];
 }
 
 export const BasicNode = ({
@@ -36,7 +31,7 @@ export const BasicNode = ({
   const showCommandPanel = isFocused && node?.value?.match(/^\//);
 
   const { changeNodeValue, changeNodeType, removeNodeByIndex, addNode } =
-    useAppState();
+    useNodesContext();
 
   const parseCommand = (nodeType: string) => {
     changeNodeValue(node, "");
@@ -55,13 +50,14 @@ export const BasicNode = ({
     }
   }, [node?.value]);
 
-  const onKeyDown = (event: any) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
     if (event.key === "Enter") {
       event.preventDefault();
-      if (event.target.textContent[0] === "/") {
+      if (target.textContent?.[0] === "/") {
         return;
       }
-      if (node.type !== "text" && event.target.textContent.length === 0) {
+      if (node.type !== "text" && target?.textContent?.length === 0) {
         changeNodeType(node, "text");
         return;
       }
@@ -69,12 +65,11 @@ export const BasicNode = ({
       updateFocusedIndex(index + 1);
     }
     if (event.key === "Backspace") {
-      if (event.target.textContent.length === 0) {
+      if (target.textContent?.length === 0) {
         event.preventDefault();
         removeNodeByIndex(index);
         updateFocusedIndex(index - 1);
       } else if (window?.getSelection()?.anchorOffset === 0) {
-        console.log("----");
         event.preventDefault();
         removeNodeByIndex(index - 1);
         updateFocusedIndex(index - 1);
@@ -82,7 +77,7 @@ export const BasicNode = ({
     }
   };
 
-  const handleInput = ({ currentTarget }: any) => {
+  const handleInput = ({ currentTarget }: FormEvent<HTMLDivElement>) => {
     const { textContent } = currentTarget;
     changeNodeValue(node, textContent);
   };
@@ -97,7 +92,6 @@ export const BasicNode = ({
         <CommandPanel
           selectItem={parseCommand}
           nodeText={node.value}
-          supportedNodeTypes={supportedNodeTypes}
         />
       )}
       <div

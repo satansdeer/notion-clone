@@ -1,28 +1,20 @@
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
-import { useAppState } from "../state/AppStateContext";
+import { useAppState, useNodesContext } from "../state/AppStateContext";
 import { CoverImage } from "./CoverImage";
 import { NodeContainer } from "../Node/NodeContainer";
 import { PageSpacer } from "./PageSpacer";
 import { PageTitle } from "./PageTitle";
 
 export const Page = () => {
-  const {
-    title,
-    nodes,
-    coverImage,
-    loading,
-    addNode,
-    setNodes,
-    setTitle,
-    setCoverImage,
-  } = useAppState();
+  const { title, coverImage, loading, setTitle, setCoverImage } = useAppState();
+  const { nodes, addNode, setNodes } = useNodesContext();
 
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
 
   useEffect(() => {
-    const onKeyDown = (event: any) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowUp") {
         setFocusedNodeIndex((index) => Math.max(index - 1, 0));
       }
@@ -52,7 +44,7 @@ export const Page = () => {
           ghostClass="node-container-ghost"
           dragClass="node-container-drag"
         >
-          {nodes.map((node: any, index: number) => {
+          {nodes.map((node, index) => {
             return (
               <NodeContainer
                 key={node.id}
@@ -69,7 +61,6 @@ export const Page = () => {
             addNode({ type: "text", value: "", id: nanoid() }, nodes.length);
             setFocusedNodeIndex(nodes.length);
           }}
-          updateFocusedIndex={setFocusedNodeIndex}
           showHint={!nodes.length}
         />
       </div>

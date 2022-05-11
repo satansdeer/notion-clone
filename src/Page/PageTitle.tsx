@@ -1,11 +1,16 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
-import { useAppState } from "../state/AppStateContext";
+import { useNodesContext } from "../state/AppStateContext";
 
-export const PageTitle = ({ title, changePageTitle }: any) => {
+type PageTitleProps = {
+  title: string;
+  changePageTitle(title: string): void;
+};
+
+export const PageTitle = ({ title, changePageTitle }: PageTitleProps) => {
   const headerRef = useRef<any>(null);
 
-  const { addNode } = useAppState();
+  const { addNode } = useNodesContext();
 
   useEffect(() => {
     headerRef.current.textContent = title;
@@ -25,7 +30,7 @@ export const PageTitle = ({ title, changePageTitle }: any) => {
         }}
         contentEditable
         suppressContentEditableWarning
-        onInput={(e) => changePageTitle(e.currentTarget.textContent)}
+        onInput={(e) => changePageTitle(e.currentTarget.textContent || "")}
       />
     </div>
   );

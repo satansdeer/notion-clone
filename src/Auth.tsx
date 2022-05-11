@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { FormEvent } from "react";
+import { FormEventHandler, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuthSession } from "./AuthSessionContext";
 import { supabase } from "./supabaseClient";
@@ -8,7 +9,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const { session } = useAuthSession();
 
-  const handleLogin = async (e: any) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -24,7 +25,7 @@ export default function Auth() {
   };
 
 	if(session){
-		return <Navigate to="/start"/>
+		return <Navigate to="/"/>
 	}
 
   return (

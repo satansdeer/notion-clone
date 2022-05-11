@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { NodeData, NodeType, useAppState } from "../state/AppStateContext";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { NodeData, NodeType, useNodesContext } from "../state/AppStateContext";
 import { supabase } from "../supabaseClient";
 import { uploadImage } from "../uploadImage";
 
@@ -12,7 +12,7 @@ export const ImageNode = ({ node }: ImageNodeProps) => {
   const fileInputRef = useRef<any>(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  const { changeNodeValue } = useAppState();
+  const { changeNodeValue } = useNodesContext();
 
   useEffect(() => {
     if (!node.value) {
@@ -36,11 +36,11 @@ export const ImageNode = ({ node }: ImageNodeProps) => {
     }
   }, [node.type, node.value]);
 
-  const onImageUpload = async (event: any) => {
+  const onImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
       // setUploading(true)
-
-      const result = await uploadImage(event);
+			const target = event.target as HTMLInputElement;
+      const result = await uploadImage(target.files?.[0]);
 
       await changeNodeValue(node, result?.filePath);
       // onUpload(filePath)

@@ -39,12 +39,6 @@ export const useNodesState = () => {
   };
 
   // const changeNodeType = async (node: NodeData, type: NodeType) => {
-  //   if (type === "page") {
-  //     const newPage = await createPage();
-  //     if (newPage) {
-  //       changeNodeValue(node, newPage.slug);
-  //     }
-  //   }
   //   setNodes((oldNodes) =>
   //     oldNodes.map((oldNode) => {
   //       if (oldNode.id === node.id) {

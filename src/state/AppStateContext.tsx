@@ -1,24 +1,26 @@
-import { nanoid } from "nanoid";
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import { useMatch } from "react-router-dom";
-import { debounce } from "../debounce";
+import { createPage } from "../createPage";
 import { supabase } from "../supabaseClient";
+import { updatePage } from "./updatePage";
 import { useNodesState } from "./useNodesState";
 
 type AppStateContextType = {
-  title?: string;
-  nodes: NodeData[];
+  title: string;
   coverImage?: string;
   loading: boolean;
-  createPage: any;
-  setNodes: any;
-  addNode: any;
-  removeNodeByIndex: any;
-  changeNodeType: any;
-  changeNodeValue: any;
   setTitle: any;
   setCoverImage: any;
 };
+
+type NodesContextValue = {
+	nodes: NodeData[];
+	setNodes: any;
+	addNode: any;
+	removeNodeByIndex: any;
+	changeNodeType: any;
+	changeNodeValue: any;
+}
 
 export type NodeType =
   | "text"
@@ -47,23 +49,19 @@ const AppStateContext = createContext<AppStateContextType>(
   {} as AppStateContextType
 );
 
-const updatePage = debounce(async (page: Partial<Page> & Pick<Page, "id">) => {
-  if (!page) {
-    return;
-  }
-  const { error } = await supabase.from("pages").update(page).eq("id", page.id);
-}, 500);
+const NodesContext = createContext<NodesContextValue>(
+  {} as NodesContextValue
+);
 
 export const AppStateProvider: FC = ({ children }) => {
   const [loading, setLoading] = useState(true);
-  const [pageId, setPageId] = useState<string>();
-  const [title, setTitle] = useState<string>();
+  const [pageId, setPageId] = useState();
+  const [title, setTitle] = useState("");
   const [coverImage, setCoverImage] = useState<string>();
   const { nodes, setNodes, addNode, removeNodeByIndex, updateNode } =
     useNodesState();
   const match = useMatch("/:slug");
   const pageSlug = match ? match.params.slug : "start";
-  const user = supabase.auth.user();
 
   useEffect(() => {
     const fetchPage = async () => {
@@ -82,25 +80,6 @@ export const AppStateProvider: FC = ({ children }) => {
     fetchPage();
   }, [pageSlug]);
 
-  const createPage = async () => {
-    if (!user) {
-      return;
-    }
-    const slug = nanoid();
-
-    const page = {
-      title: "Untitled",
-      slug,
-      nodes: [],
-      created_by: user.id,
-    };
-
-    const { data } = await supabase.from("pages").insert(page);
-    console.log("Created page", data);
-
-    return page;
-  };
-
   useEffect(() => {
     if (!pageId || loading) {
       return;
@@ -114,7 +93,13 @@ export const AppStateProvider: FC = ({ children }) => {
     updatePage(page);
   }, [pageId, title, nodes, coverImage, loading]);
 
-  const changeNodeType = (node: NodeData, type: NodeType) => {
+  const changeNodeType = async (node: NodeData, type: NodeType) => {
+    if (type === "page") {
+      const newPage = await createPage();
+      if (newPage) {
+        changeNodeValue(node, newPage.slug);
+      }
+    }
     updateNode(node, { type });
   };
 
@@ -123,25 +108,28 @@ export const AppStateProvider: FC = ({ children }) => {
   };
 
   return (
-    <AppStateContext.Provider
-      value={{
-        title,
-        nodes,
-        coverImage,
-        loading,
-        createPage,
-        setNodes,
-        addNode,
-        removeNodeByIndex,
-        changeNodeType,
-        changeNodeValue,
-        setTitle,
-        setCoverImage,
-      }}
-    >
-      {children}
-    </AppStateContext.Provider>
+    <NodesContext.Provider value={{
+			nodes,
+			setNodes,
+			addNode,
+			removeNodeByIndex,
+			changeNodeType,
+			changeNodeValue,
+		}}>
+      <AppStateContext.Provider
+        value={{
+          title,
+          coverImage,
+          loading,
+          setTitle,
+          setCoverImage,
+        }}
+      >
+        {children}
+      </AppStateContext.Provider>
+    </NodesContext.Provider>
   );
 };
 
 export const useAppState = () => useContext(AppStateContext);
+export const useNodesContext = () => useContext(NodesContext);

@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { uploadImage } from "../uploadImage";
 
 type CoverImageProps = {
-	filePath?: string;
-	changePageCover: (filePath: string) => void;
-}
+  filePath?: string;
+  changePageCover: (filePath: string) => void;
+};
 
-export const CoverImage = ({filePath, changePageCover}: CoverImageProps) => {
+export const CoverImage = ({ filePath, changePageCover }: CoverImageProps) => {
   const [cover, setCover] = useState("");
   const fileInputRef = useRef<any>(null);
 
@@ -15,33 +15,28 @@ export const CoverImage = ({filePath, changePageCover}: CoverImageProps) => {
     fileInputRef.current.click();
   };
 
-  const onCoverImageUpload = async (event: any) => {
-    const result = await uploadImage(event);
+  const onCoverImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    const result = await uploadImage(target?.files?.[0]);
 
-		if(result?.filePath) {
-    	changePageCover(result.filePath);
-		}
+    if (result?.filePath) {
+      changePageCover(result.filePath);
+    }
   };
-
 
   useEffect(() => {
     const downloadImage = async (filePath: string) => {
-      const { data } = await supabase.storage
-        .from("images")
-        .download(filePath);
+      const { data } = await supabase.storage.from("images").download(filePath);
       if (data) {
-        console.log("Downloaded image", data);
         const url = URL.createObjectURL(data);
-        console.log("url", url);
         setCover(url);
       }
     };
-		setCover("");
+    setCover("");
     if (filePath) {
       downloadImage(filePath);
     }
   }, [filePath]);
-
 
   return (
     <div className="page-header">
