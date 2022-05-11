@@ -1,8 +1,9 @@
+import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
-import { useAppState } from "./AppStateContext";
+import { useAppState } from "../AppStateContext";
 import { CoverImage } from "./CoverImage";
-import { NodeContainer } from "./Node/NodeContainer";
+import { NodeContainer } from "../Node/NodeContainer";
 import { PageSpacer } from "./PageSpacer";
 import { PageTitle } from "./PageTitle";
 
@@ -12,7 +13,8 @@ export const Page = () => {
     nodes,
     coverImage,
     loading,
-    updateNodes,
+    addNode,
+    setNodes,
     changePageTitle,
     changePageCover,
   } = useAppState();
@@ -33,20 +35,6 @@ export const Page = () => {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [nodes]);
 
-  // const onAddNode = (node: any, index: number) => {
-  //   addNode(node, index);
-  //   setFocusedNodeIndex(index);
-  // };
-
-  // const onRemoveNode = (node: any) => {
-  //   removeNode(node);
-  //   setFocusedNodeIndex((index) => index - 1);
-  // };
-
-  // const onChangeNodeType = async (node: any, type: string) => {
-  //   changeNodeType(node, type);
-  // };
-
   if (loading) {
     return <>Loading...</>;
   }
@@ -60,7 +48,7 @@ export const Page = () => {
           animation={200}
           delay={100}
           list={nodes}
-          setList={updateNodes}
+          setList={setNodes}
           ghostClass="node-container-ghost"
           dragClass="node-container-drag"
         >
@@ -77,6 +65,10 @@ export const Page = () => {
           })}
         </ReactSortable>
         <PageSpacer
+          handleClick={() => {
+            addNode({ type: "text", value: "", id: nanoid() }, nodes.length);
+            setFocusedNodeIndex(nodes.length);
+          }}
           updateFocusedIndex={setFocusedNodeIndex}
           showHint={!nodes.length}
         />

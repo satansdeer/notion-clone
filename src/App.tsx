@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { Page } from "./Page";
+import { Page } from "./Page/Page";
 import Auth from "./Auth";
 import { Private } from "./Private";
 import { AppStateProvider } from "./AppStateContext";

@@ -1,17 +1,47 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
-import { useAppState } from "../AppStateContext";
+import { NodeData, NodeType, useAppState } from "../AppStateContext";
+import { CommandPanel } from "./CommandPanel";
+
+export type SupportedNodeType = {
+  value: NodeType;
+  name: string;
+};
+
+const supportedNodeTypes: SupportedNodeType[] = [
+  { value: "text", name: "Text" },
+  { value: "image", name: "Image" },
+  { value: "list", name: "List" },
+  { value: "page", name: "Page" },
+  { value: "heading1", name: "Heading 1" },
+  { value: "heading2", name: "Heading 2" },
+  { value: "heading3", name: "Heading 3" },
+];
+
+interface BasicNodeProps {
+	node: NodeData;
+	updateFocusedIndex(index: number): void
+	isFocused: boolean
+	index: number
+	supportedTypes: NodeType[]
+}
 
 export const BasicNode = ({
   node,
   updateFocusedIndex,
   isFocused,
   index,
-}: any) => {
+}: BasicNodeProps) => {
   const nodeRef = useRef<any>(null);
+  const showCommandPanel = isFocused && node?.value?.match(/^\//);
 
   const { changeNodeValue, changeNodeType, removeNodeByIndex, addNode } =
     useAppState();
+
+  const parseCommand = (nodeType: string) => {
+    changeNodeValue(node, "");
+    changeNodeType(node, nodeType);
+  };
 
   useEffect(() => {
     if (isFocused) {
@@ -35,7 +65,7 @@ export const BasicNode = ({
         changeNodeType(node, "text");
         return;
       }
-      addNode({ type: "text", value: "", id: nanoid() }, index + 1);
+      addNode({ type: node.type, value: "", id: nanoid() }, index + 1);
       updateFocusedIndex(index + 1);
     }
     if (event.key === "Backspace") {
@@ -62,15 +92,24 @@ export const BasicNode = ({
   };
 
   return (
-    <div
-      data-placeholder="Type '/' for commands"
-      ref={nodeRef}
-      onClick={handleClick}
-      onKeyDown={onKeyDown}
-      onInput={handleInput}
-      contentEditable
-      suppressContentEditableWarning
-      className={`node ${node.type}`}
-    />
+    <>
+      {showCommandPanel && (
+        <CommandPanel
+          selectItem={parseCommand}
+          nodeText={node.value}
+          supportedNodeTypes={supportedNodeTypes}
+        />
+      )}
+      <div
+        data-placeholder="Type '/' for commands"
+        ref={nodeRef}
+        onClick={handleClick}
+        onKeyDown={onKeyDown}
+        onInput={handleInput}
+        contentEditable
+        suppressContentEditableWarning
+        className={`node ${node.type}`}
+      />
+    </>
   );
 };

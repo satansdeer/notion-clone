@@ -5,13 +5,48 @@ import { debounce } from "./debounce";
 import { supabase } from "./supabaseClient";
 
 type AppStateContextType = {
-  pages: any;
-  addPage(): any;
+  title?: string;
+  nodes: NodeData[];
+  coverImage?: string;
+  loading: boolean;
+  createPage: any;
+  setNodes: any;
+  addNode: any;
+  removeNodeByIndex: any;
+  changeNodeType: any;
+  changeNodeValue: any;
+  changePageTitle: any;
+  changePageCover: any;
 };
 
-const AppStateContext = createContext<any>({} as AppStateContextType);
+export type NodeType =
+  | "text"
+  | "image"
+  | "list"
+  | "page"
+  | "heading1"
+  | "heading2"
+  | "heading3";
 
-const updatePage = debounce(async (page: any) => {
+export type NodeData = {
+  id: string;
+  type: NodeType;
+  value: string;
+};
+
+type Page = {
+  id: string;
+  slug: string;
+  title: string;
+  nodes: NodeData[];
+  cover: string;
+};
+
+const AppStateContext = createContext<AppStateContextType>(
+  {} as AppStateContextType
+);
+
+const updatePage = debounce(async (page: Partial<Page> & Pick<Page, "id">) => {
   if (!page) {
     return;
   }
@@ -19,11 +54,11 @@ const updatePage = debounce(async (page: any) => {
 }, 500);
 
 export const AppStateProvider: FC = ({ children }) => {
-  const [loading, setLoading] = useState<any>(true);
-  const [pageId, setPageId] = useState<any>(null);
-  const [title, setTitle] = useState<any>(null);
-  const [nodes, setNodes] = useState<any>([]);
-  const [coverImage, setCoverImage] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [pageId, setPageId] = useState<string>();
+  const [title, setTitle] = useState<string>();
+  const [nodes, setNodes] = useState<NodeData[]>([]);
+  const [coverImage, setCoverImage] = useState<string>();
   const match = useMatch("/:slug");
   const pageSlug = match ? match.params.slug : "start";
   const user = supabase.auth.user();
@@ -77,20 +112,16 @@ export const AppStateProvider: FC = ({ children }) => {
     updatePage(page);
   }, [pageId, title, nodes, coverImage, loading]);
 
-  const updateNodes = (nodes: any) => {
-    setNodes(nodes);
-  };
-
-  const addNode = async (node: any, index: number) => {
-    updateNodes((oldNodes: any) => [
+  const addNode = async (node: NodeData, index: number) => {
+    setNodes((oldNodes) => [
       ...oldNodes.slice(0, index),
       node,
       ...oldNodes.slice(index),
     ]);
   };
 
-  const removeNodeByIndex = async (nodeIndex: any) => {
-    updateNodes((oldNodes: any) => [
+  const removeNodeByIndex = async (nodeIndex: number) => {
+    setNodes((oldNodes) => [
       ...oldNodes.slice(0, nodeIndex),
       ...oldNodes.slice(nodeIndex + 1),
     ]);
@@ -104,9 +135,10 @@ export const AppStateProvider: FC = ({ children }) => {
     setCoverImage(cover);
   };
 
-  const changeNodeValue = async (node: any, value: string) => {
-    updateNodes((oldNodes: any) =>
-      oldNodes.map((oldNode: any) => {
+  const changeNodeValue = async (node: NodeData, value: string) => {
+    console.log("changeNodeValue", node, value);
+    setNodes((oldNodes) =>
+      oldNodes.map((oldNode) => {
         if (oldNode.id === node.id) {
           return {
             ...oldNode,
@@ -119,16 +151,15 @@ export const AppStateProvider: FC = ({ children }) => {
     );
   };
 
-  const changeNodeType = async (node: any, type: string) => {
-    console.log("changeNodeType", node, type);
+  const changeNodeType = async (node: NodeData, type: NodeType) => {
     if (type === "page") {
       const newPage = await createPage();
       if (newPage) {
         changeNodeValue(node, newPage.slug);
       }
     }
-    updateNodes((oldNodes: any) =>
-      oldNodes.map((oldNode: any) => {
+    setNodes((oldNodes) =>
+      oldNodes.map((oldNode) => {
         if (oldNode.id === node.id) {
           return {
             ...oldNode,
@@ -149,7 +180,7 @@ export const AppStateProvider: FC = ({ children }) => {
         coverImage,
         loading,
         createPage,
-        updateNodes,
+        setNodes,
         addNode,
         removeNodeByIndex,
         changeNodeType,

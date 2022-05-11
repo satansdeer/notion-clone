@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { useOverflowsScreenBottom } from "./useOverflowsScreenBottom";
+import { useOverflowsScreenBottom } from "../useOverflowsScreenBottom";
+import { SupportedNodeType } from "./BasicNode";
+
+type CommandPanelProps = {
+  nodeText: string;
+  selectItem: (nodeType: string) => void;
+  supportedNodeTypes: SupportedNodeType[];
+};
 
 export const CommandPanel = ({
   selectItem,
   supportedNodeTypes,
   nodeText,
-}: any) => {
+}: CommandPanelProps) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const { overflows, ref } = useOverflowsScreenBottom();
 
@@ -21,14 +28,12 @@ export const CommandPanel = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedItemIndex]);
+  }, [selectedItemIndex, supportedNodeTypes, selectItem]);
 
   useEffect(() => {
     const normalizedValue = nodeText.toLowerCase().replace(/\//g, "");
     setSelectedItemIndex(
-      supportedNodeTypes.findIndex((item: any) =>
-        item.value.match(normalizedValue)
-      )
+      supportedNodeTypes.findIndex((item) => item.value.match(normalizedValue))
     );
   }, [nodeText, supportedNodeTypes]);
 

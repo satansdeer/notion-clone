@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { NodeData, NodeType } from "../AppStateContext";
 import { supabase } from "../supabaseClient";
+
+type PageNodeProps = {
+	node: NodeData;
+	supportedTypes: NodeType[];
+}
 
 export const PageNode = ({
   node,
-}: any) => {
+}: PageNodeProps) => {
   const navigate = useNavigate();
   const [pageTitle, setPageTitle] = useState("");
 
   useEffect(() => {
     const fetchPageTitle = async () => {
-      const { data, error, status } = await supabase
+      const { data } = await supabase
         .from("pages")
         .select("title")
         .eq("slug", node.value)
