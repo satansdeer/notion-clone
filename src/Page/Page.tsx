@@ -8,6 +8,7 @@ import { PageTitle } from "./PageTitle";
 import { List, arrayMove } from "react-movable";
 
 export const Page = () => {
+  const isRootPage = window.location.pathname === "/";
   const { nodes, addNode, setNodes, title, cover, setTitle, setCoverImage } =
     useAppState();
 
@@ -30,7 +31,7 @@ export const Page = () => {
   return (
     <>
       <CoverImage filePath={cover} changePageCover={setCoverImage} />
-			<a href="/">Back to main page</a>
+      {!isRootPage && <a href="/">Back to main page</a>}
       <PageTitle title={title} changePageTitle={setTitle} />
       <div className="page-body">
         <List

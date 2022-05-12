@@ -78,6 +78,7 @@ export const AppStateProvider = withInitialState<AppStateProviderProps>(
       } else {
         setPage((draft) => {
           draft.nodes[nodeIndex].type = type;
+          draft.nodes[nodeIndex].value = ""
         });
       }
     };

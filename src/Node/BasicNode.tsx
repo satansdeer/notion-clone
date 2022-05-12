@@ -34,7 +34,6 @@ export const BasicNode = ({
     useAppState();
 
   const parseCommand = (nodeType: string) => {
-    changeNodeValue(node, "");
     changeNodeType(index, nodeType);
   };
 

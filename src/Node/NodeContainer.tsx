@@ -30,8 +30,8 @@ export const NodeContainer = ({
           node={node}
           updateFocusedIndex={updateFocusedIndex}
         />
-        <ImageNode supportedTypes={["image"]} node={node} />
-        <PageNode supportedTypes={["page"]} node={node} />
+        <ImageNode supportedTypes={["image"]} node={node} index={index} />
+        <PageNode supportedTypes={["page"]} node={node} index={index} />
       </SwitchNode>
     </div>
   );
