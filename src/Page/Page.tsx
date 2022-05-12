@@ -1,15 +1,15 @@
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
-import { ReactSortable } from "react-sortablejs";
-import { useAppState, useNodesContext } from "../state/AppStateContext";
+import { useAppState } from "../state/AppStateContext";
 import { CoverImage } from "./CoverImage";
 import { NodeContainer } from "../Node/NodeContainer";
 import { PageSpacer } from "./PageSpacer";
 import { PageTitle } from "./PageTitle";
+import { List, arrayMove } from "react-movable";
 
 export const Page = () => {
-  const { title, coverImage, loading, setTitle, setCoverImage } = useAppState();
-  const { nodes, addNode, setNodes } = useNodesContext();
+  const { nodes, addNode, setNodes, title, cover, setTitle, setCoverImage } =
+    useAppState();
 
   const [focusedNodeIndex, setFocusedNodeIndex] = useState(0);
 
@@ -27,35 +27,30 @@ export const Page = () => {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [nodes]);
 
-  if (loading) {
-    return <>Loading...</>;
-  }
-
   return (
     <>
-      <CoverImage filePath={coverImage} changePageCover={setCoverImage} />
+      <CoverImage filePath={cover} changePageCover={setCoverImage} />
+			<a href="/">Back to main page</a>
       <PageTitle title={title} changePageTitle={setTitle} />
       <div className="page-body">
-        <ReactSortable
-          animation={200}
-          delay={100}
-          list={nodes}
-          setList={setNodes}
-          ghostClass="node-container-ghost"
-          dragClass="node-container-drag"
-        >
-          {nodes.map((node, index) => {
-            return (
+        <List
+          values={nodes}
+          onChange={({ oldIndex, newIndex }) =>
+            setNodes(arrayMove(nodes, oldIndex, newIndex))
+          }
+          renderList={({ children, props }) => <div {...props}>{children}</div>}
+          renderItem={({ value, props, index }) => (
+            <div {...props}>
               <NodeContainer
-                key={node.id}
+                key={value.id}
                 isFocused={index === focusedNodeIndex}
                 updateFocusedIndex={setFocusedNodeIndex}
-                node={node}
-                index={index}
+                node={value}
+                index={index || 0}
               />
-            );
-          })}
-        </ReactSortable>
+            </div>
+          )}
+        />
         <PageSpacer
           handleClick={() => {
             addNode({ type: "text", value: "", id: nanoid() }, nodes.length);

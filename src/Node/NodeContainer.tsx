@@ -5,11 +5,11 @@ import { SwitchNode } from "./SwitchNode";
 import { NodeData } from "../state/AppStateContext";
 
 type NodeContainerProps = {
-	node: NodeData;
-	index: number;
-	updateFocusedIndex: (index: number) => void;
-	isFocused: boolean;
-}
+  node: NodeData;
+  index: number;
+  updateFocusedIndex: (index: number) => void;
+  isFocused: boolean;
+};
 
 export const NodeContainer = ({
   node,
@@ -19,23 +19,19 @@ export const NodeContainer = ({
 }: NodeContainerProps) => {
   return (
     <div className="node-container">
-      <div className="node-drag-handle">⠿</div>
+      <div data-movable-handle className="node-drag-handle">
+        ⠿
+      </div>
       <SwitchNode type={node.type}>
         <BasicNode
           supportedTypes={["text", "list", "heading1", "heading2", "heading3"]}
           index={index}
-					isFocused={isFocused}
+          isFocused={isFocused}
           node={node}
           updateFocusedIndex={updateFocusedIndex}
         />
-        <ImageNode
-          supportedTypes={["image"]}
-          node={node}
-        />
-        <PageNode
-          supportedTypes={["page"]}
-          node={node}
-        />
+        <ImageNode supportedTypes={["image"]} node={node} />
+        <PageNode supportedTypes={["page"]} node={node} />
       </SwitchNode>
     </div>
   );

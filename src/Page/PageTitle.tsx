@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
-import { useNodesContext } from "../state/AppStateContext";
+import { useAppState } from "../state/AppStateContext";
 
 type PageTitleProps = {
   title: string;
@@ -10,7 +10,7 @@ type PageTitleProps = {
 export const PageTitle = ({ title, changePageTitle }: PageTitleProps) => {
   const headerRef = useRef<any>(null);
 
-  const { addNode } = useNodesContext();
+  const { addNode } = useAppState();
 
   useEffect(() => {
     headerRef.current.textContent = title;

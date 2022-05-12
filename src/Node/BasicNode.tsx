@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import {
   NodeData,
   NodeType,
-  useNodesContext,
+	useAppState,
 } from "../state/AppStateContext";
 import { CommandPanel } from "./CommandPanel";
 
@@ -31,11 +31,11 @@ export const BasicNode = ({
   const showCommandPanel = isFocused && node?.value?.match(/^\//);
 
   const { changeNodeValue, changeNodeType, removeNodeByIndex, addNode } =
-    useNodesContext();
+    useAppState();
 
   const parseCommand = (nodeType: string) => {
     changeNodeValue(node, "");
-    changeNodeType(node, nodeType);
+    changeNodeType(index, nodeType);
   };
 
   useEffect(() => {
@@ -58,7 +58,8 @@ export const BasicNode = ({
         return;
       }
       if (node.type !== "text" && target?.textContent?.length === 0) {
-        changeNodeType(node, "text");
+        changeNodeType(index, "text");
+				console.log("!!!!")
         return;
       }
       addNode({ type: node.type, value: "", id: nanoid() }, index + 1);
@@ -79,7 +80,7 @@ export const BasicNode = ({
 
   const handleInput = ({ currentTarget }: FormEvent<HTMLDivElement>) => {
     const { textContent } = currentTarget;
-    changeNodeValue(node, textContent);
+    changeNodeValue(index, textContent);
   };
 
   const handleClick = () => {

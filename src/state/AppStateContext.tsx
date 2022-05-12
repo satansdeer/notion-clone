@@ -1,26 +1,26 @@
-import { createContext, FC, useContext, useEffect, useState } from "react";
-import { useMatch } from "react-router-dom";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
+import { useImmer } from "use-immer";
 import { createPage } from "../createPage";
-import { supabase } from "../supabaseClient";
 import { updatePage } from "./updatePage";
-import { useNodesState } from "./useNodesState";
+import { withInitialState } from "./withInitialState";
 
 type AppStateContextType = {
   title: string;
-  coverImage?: string;
-  loading: boolean;
+  cover: string;
   setTitle: any;
   setCoverImage: any;
+  nodes: NodeData[];
+  setNodes: any;
+  addNode: any;
+  removeNodeByIndex: any;
+  changeNodeType: any;
+  changeNodeValue: any;
 };
-
-type NodesContextValue = {
-	nodes: NodeData[];
-	setNodes: any;
-	addNode: any;
-	removeNodeByIndex: any;
-	changeNodeType: any;
-	changeNodeValue: any;
-}
 
 export type NodeType =
   | "text"
@@ -49,87 +49,92 @@ const AppStateContext = createContext<AppStateContextType>(
   {} as AppStateContextType
 );
 
-const NodesContext = createContext<NodesContextValue>(
-  {} as NodesContextValue
-);
+type AppStateProviderProps = {
+  children: React.ReactNode;
+  initialState: Page;
+};
 
-export const AppStateProvider: FC = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [pageId, setPageId] = useState();
-  const [title, setTitle] = useState("");
-  const [coverImage, setCoverImage] = useState<string>();
-  const { nodes, setNodes, addNode, removeNodeByIndex, updateNode } =
-    useNodesState();
-  const match = useMatch("/:slug");
-  const pageSlug = match ? match.params.slug : "start";
+export const AppStateProvider = withInitialState<AppStateProviderProps>(
+  ({ children, initialState }) => {
+    const [page, setPage] = useImmer(initialState);
+    const didMountRef = useRef(false);
 
-  useEffect(() => {
-    const fetchPage = async () => {
-      const { data } = await supabase
-        .from("pages")
-        .select(`title, id, cover, nodes`)
-        .eq("slug", pageSlug)
-        .single();
-
-      setTitle(data?.title);
-      setCoverImage(data?.cover);
-      setNodes(data?.nodes);
-      setPageId(data?.id);
-      setLoading(false);
-    };
-    fetchPage();
-  }, [pageSlug]);
-
-  useEffect(() => {
-    if (!pageId || loading) {
-      return;
-    }
-    const page = {
-      id: pageId,
-      title,
-      nodes,
-      cover: coverImage,
-    };
-    updatePage(page);
-  }, [pageId, title, nodes, coverImage, loading]);
-
-  const changeNodeType = async (node: NodeData, type: NodeType) => {
-    if (type === "page") {
-      const newPage = await createPage();
-      if (newPage) {
-        changeNodeValue(node, newPage.slug);
+    useEffect(() => {
+      if (didMountRef.current) {
+        updatePage(page);
       }
-    }
-    updateNode(node, { type });
-  };
+      didMountRef.current = true;
+    }, [page]);
 
-  const changeNodeValue = (node: NodeData, value: string) => {
-    updateNode(node, { value });
-  };
+    const changeNodeType = async (nodeIndex: number, type: NodeType) => {
+      if (type === "page") {
+        const newPage = await createPage();
+        if (newPage) {
+          setPage((draft) => {
+            draft.nodes[nodeIndex].type = type;
+            draft.nodes[nodeIndex].value = newPage.slug;
+          });
+        }
+      } else {
+        setPage((draft) => {
+          draft.nodes[nodeIndex].type = type;
+        });
+      }
+    };
 
-  return (
-    <NodesContext.Provider value={{
-			nodes,
-			setNodes,
-			addNode,
-			removeNodeByIndex,
-			changeNodeType,
-			changeNodeValue,
-		}}>
+    const changeNodeValue = (nodeIndex: number, value: string) => {
+      setPage((draft) => {
+        draft.nodes[nodeIndex].value = value;
+      });
+    };
+
+    const removeNodeByIndex = (nodeIndex: number) => {
+      setPage((draft) => {
+        draft.nodes.splice(nodeIndex, 1);
+      });
+    };
+
+    const addNode = (node: NodeData, index: number) => {
+      setPage((draft) => {
+        draft.nodes.splice(index, 0, node);
+      });
+    };
+
+    const setTitle = (title: string) => {
+      setPage((draft) => {
+        draft.title = title;
+      });
+    };
+
+    const setCoverImage = (coverImage: string) => {
+      setPage((draft) => {
+        draft.cover = coverImage;
+      });
+    };
+
+    const setNodes = (nodes: NodeData[]) => {
+      setPage((draft) => {
+        draft.nodes = nodes;
+      });
+    };
+
+    return (
       <AppStateContext.Provider
         value={{
-          title,
-          coverImage,
-          loading,
+          ...page,
           setTitle,
           setCoverImage,
+          setNodes,
+          addNode,
+          removeNodeByIndex,
+          changeNodeType,
+          changeNodeValue,
         }}
       >
         {children}
       </AppStateContext.Provider>
-    </NodesContext.Provider>
-  );
-};
+    );
+  }
+);
 
 export const useAppState = () => useContext(AppStateContext);
-export const useNodesContext = () => useContext(NodesContext);

@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { NodeData, NodeType, useNodesContext } from "../state/AppStateContext";
+import { NodeData, NodeType, useAppState } from "../state/AppStateContext";
 import { supabase } from "../supabaseClient";
 import { uploadImage } from "../uploadImage";
 
@@ -12,7 +12,7 @@ export const ImageNode = ({ node }: ImageNodeProps) => {
   const fileInputRef = useRef<any>(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  const { changeNodeValue } = useNodesContext();
+  const { changeNodeValue } = useAppState();
 
   useEffect(() => {
     if (!node.value) {
