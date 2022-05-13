@@ -1,26 +1,8 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
-import { useImmer } from "use-immer";
-import { createPage } from "../createPage";
-import { updatePage } from "./updatePage";
+import { createContext, useContext } from "react";
+import { Page, usePageState } from "./usePageState";
 import { withInitialState } from "./withInitialState";
 
-type AppStateContextType = {
-  title: string;
-  cover: string;
-  setTitle: any;
-  setCoverImage: any;
-  nodes: NodeData[];
-  setNodes: any;
-  addNode: any;
-  removeNodeByIndex: any;
-  changeNodeType: any;
-  changeNodeValue: any;
-};
+type AppStateContextType = ReturnType<typeof usePageState>;
 
 export type NodeType =
   | "text"
@@ -37,14 +19,6 @@ export type NodeData = {
   value: string;
 };
 
-export type Page = {
-  id: string;
-  slug: string;
-  title: string;
-  nodes: NodeData[];
-  cover: string;
-};
-
 const AppStateContext = createContext<AppStateContextType>(
   {} as AppStateContextType
 );
@@ -56,82 +30,10 @@ type AppStateProviderProps = {
 
 export const AppStateProvider = withInitialState<AppStateProviderProps>(
   ({ children, initialState }) => {
-    const [page, setPage] = useImmer(initialState);
-    const didMountRef = useRef(false);
-
-    useEffect(() => {
-      if (didMountRef.current) {
-        updatePage(page);
-      }
-      didMountRef.current = true;
-    }, [page]);
-
-    const changeNodeType = async (nodeIndex: number, type: NodeType) => {
-      if (type === "page") {
-        const newPage = await createPage();
-        if (newPage) {
-          setPage((draft) => {
-            draft.nodes[nodeIndex].type = type;
-            draft.nodes[nodeIndex].value = newPage.slug;
-          });
-        }
-      } else {
-        setPage((draft) => {
-          draft.nodes[nodeIndex].type = type;
-          draft.nodes[nodeIndex].value = ""
-        });
-      }
-    };
-
-    const changeNodeValue = (nodeIndex: number, value: string) => {
-      setPage((draft) => {
-        draft.nodes[nodeIndex].value = value;
-      });
-    };
-
-    const removeNodeByIndex = (nodeIndex: number) => {
-      setPage((draft) => {
-        draft.nodes.splice(nodeIndex, 1);
-      });
-    };
-
-    const addNode = (node: NodeData, index: number) => {
-      setPage((draft) => {
-        draft.nodes.splice(index, 0, node);
-      });
-    };
-
-    const setTitle = (title: string) => {
-      setPage((draft) => {
-        draft.title = title;
-      });
-    };
-
-    const setCoverImage = (coverImage: string) => {
-      setPage((draft) => {
-        draft.cover = coverImage;
-      });
-    };
-
-    const setNodes = (nodes: NodeData[]) => {
-      setPage((draft) => {
-        draft.nodes = nodes;
-      });
-    };
+    const pageStateHandlers = usePageState(initialState);
 
     return (
-      <AppStateContext.Provider
-        value={{
-          ...page,
-          setTitle,
-          setCoverImage,
-          setNodes,
-          addNode,
-          removeNodeByIndex,
-          changeNodeType,
-          changeNodeValue,
-        }}
-      >
+      <AppStateContext.Provider value={pageStateHandlers}>
         {children}
       </AppStateContext.Provider>
     );

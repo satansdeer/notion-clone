@@ -18,7 +18,6 @@ interface BasicNodeProps {
   updateFocusedIndex(index: number): void;
   isFocused: boolean;
   index: number;
-  supportedTypes: NodeType[];
 }
 
 export const BasicNode = ({
@@ -33,7 +32,7 @@ export const BasicNode = ({
   const { changeNodeValue, changeNodeType, removeNodeByIndex, addNode } =
     useAppState();
 
-  const parseCommand = (nodeType: string) => {
+  const parseCommand = (nodeType: NodeType) => {
     changeNodeType(index, nodeType);
   };
 
@@ -58,7 +57,6 @@ export const BasicNode = ({
       }
       if (node.type !== "text" && target?.textContent?.length === 0) {
         changeNodeType(index, "text");
-				console.log("!!!!")
         return;
       }
       addNode({ type: node.type, value: "", id: nanoid() }, index + 1);
@@ -79,7 +77,7 @@ export const BasicNode = ({
 
   const handleInput = ({ currentTarget }: FormEvent<HTMLDivElement>) => {
     const { textContent } = currentTarget;
-    changeNodeValue(index, textContent);
+    changeNodeValue(index, textContent || "");
   };
 
   const handleClick = () => {

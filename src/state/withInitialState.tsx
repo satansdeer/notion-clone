@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Page } from "./AppStateContext";
 import { supabase } from "../supabaseClient";
 import { useMatch } from "react-router-dom";
+import { Page } from "./usePageState";
 
 type InjectedProps = {
   initialState: Page;

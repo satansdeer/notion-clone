@@ -5,11 +5,9 @@ import { uploadImage } from "../uploadImage";
 
 type ImageNodeProps = {
   node: NodeData;
-	index: number;
-  supportedTypes: NodeType[];
 };
 
-export const ImageNode = ({ node, index }: ImageNodeProps) => {
+export const ImageNode = ({ node }: ImageNodeProps) => {
   const fileInputRef = useRef<any>(null);
   const [imageUrl, setImageUrl] = useState("");
 
@@ -43,7 +41,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
 			const target = event.target as HTMLInputElement;
       const result = await uploadImage(target.files?.[0]);
 
-      await changeNodeValue(index, result?.filePath);
+      // await changeNodeValue(node, result?.filePath);
       // onUpload(filePath)
     } catch (error) {
       // alert(error.message)

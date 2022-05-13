@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { NodeType } from "../state/AppStateContext";
 import { useOverflowsScreenBottom } from "../useOverflowsScreenBottom";
 import { SupportedNodeType } from "./BasicNode";
 
@@ -14,7 +15,7 @@ const supportedNodeTypes: SupportedNodeType[] = [
 
 type CommandPanelProps = {
   nodeText: string;
-  selectItem: (nodeType: string) => void;
+  selectItem: (nodeType: NodeType) => void;
 };
 
 export const CommandPanel = ({

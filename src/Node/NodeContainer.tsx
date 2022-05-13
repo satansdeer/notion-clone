@@ -1,38 +1,38 @@
-import { BasicNode } from "./BasicNode";
-import { ImageNode } from "./ImageNode";
-import { PageNode } from "./PageNode";
-import { SwitchNode } from "./SwitchNode";
 import { NodeData } from "../state/AppStateContext";
+import { NodeTypeSwitcher } from "./NodeTypeSwitcher";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type NodeContainerProps = {
   node: NodeData;
   index: number;
-  updateFocusedIndex: (index: number) => void;
   isFocused: boolean;
 };
 
 export const NodeContainer = ({
   node,
-  isFocused,
-  updateFocusedIndex,
   index,
+  isFocused,
 }: NodeContainerProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: node.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <div className="node-container">
-      <div data-movable-handle className="node-drag-handle">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="node-container"
+    >
+      <div {...listeners} className="node-drag-handle">
         ⠿
       </div>
-      <SwitchNode type={node.type}>
-        <BasicNode
-          supportedTypes={["text", "list", "heading1", "heading2", "heading3"]}
-          index={index}
-          isFocused={isFocused}
-          node={node}
-          updateFocusedIndex={updateFocusedIndex}
-        />
-        <ImageNode supportedTypes={["image"]} node={node} index={index} />
-        <PageNode supportedTypes={["page"]} node={node} index={index} />
-      </SwitchNode>
+      <NodeTypeSwitcher node={node} index={index} isFocused={isFocused} />
     </div>
   );
 };

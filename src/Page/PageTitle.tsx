@@ -25,7 +25,7 @@ export const PageTitle = ({ title, changePageTitle }: PageTitleProps) => {
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            addNode({ type: "text", id: nanoid() }, 0);
+            addNode({ type: "text", id: nanoid(), value: "" }, 0);
           }
         }}
         contentEditable

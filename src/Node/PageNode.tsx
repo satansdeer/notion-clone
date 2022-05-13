@@ -5,8 +5,6 @@ import { supabase } from "../supabaseClient";
 
 type PageNodeProps = {
 	node: NodeData;
-	index: number;
-	supportedTypes: NodeType[];
 }
 
 export const PageNode = ({

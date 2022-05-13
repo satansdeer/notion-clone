@@ -1,6 +1,8 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { uploadImage } from "../uploadImage";
+import {DndContext} from '@dnd-kit/core';
+import {SortableContext} from '@dnd-kit/sortable';
 
 type CoverImageProps = {
   filePath?: string;
@@ -40,11 +42,11 @@ export const CoverImage = ({ filePath, changePageCover }: CoverImageProps) => {
 
   return (
     <div className="page-header">
-      <img
+      {filePath ? <img
         className="header-image"
         src={cover || "/ztm-notes.png"}
         alt="Cover"
-      />
+      /> : null}
       <button className="page-header-button" onClick={onChangeCoverImage}>
         Change cover
       </button>
