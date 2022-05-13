@@ -1,16 +1,8 @@
 import { arrayMove } from "@dnd-kit/sortable";
-import { createPage } from "../createPage";
-import { NodeData, NodeType } from "./AppStateContext";
-import { updatePage } from "./updatePage";
+import { createPage } from "../utils/createPage";
+import { NodeData, NodeType, Page} from "../utils/types";
+import { updatePage } from "../utils/updatePage";
 import { useSyncedState } from "./useSyncedState";
-
-export type Page = {
-  id: string;
-  slug: string;
-  title: string;
-  nodes: NodeData[];
-  cover: string;
-};
 
 export const usePageState = (initialState: Page) => {
   const [page, setPage] = useSyncedState(initialState, updatePage);
@@ -77,7 +69,6 @@ export const usePageState = (initialState: Page) => {
   };
 
   return {
-    page,
     nodes: page.nodes,
     title: page.title,
     cover: page.cover,

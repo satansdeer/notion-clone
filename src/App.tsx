@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { Page } from "./Page/Page";
-import Auth from "./Auth";
-import { Private } from "./Private";
+import Auth from "./auth/Auth";
+import { Private } from "./auth/Private";
 import { AppStateProvider } from "./state/AppStateContext";
 
 function App() {

@@ -1,6 +1,6 @@
 import { Session } from "@supabase/supabase-js";
 import { createContext, FC, useContext, useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
 
 type AuthSessionContextValue = {
   session: ReturnType<typeof supabase.auth.session>;

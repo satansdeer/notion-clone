@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
-import { AuthSessionProvider } from "./AuthSessionContext";
+import { AuthSessionProvider } from "./auth/AuthSessionContext";
 
 ReactDOM.render(
   <React.StrictMode>

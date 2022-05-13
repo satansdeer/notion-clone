@@ -1,8 +1,9 @@
 import { FormEvent } from "react";
-import { FormEventHandler, useState } from "react";
+import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuthSession } from "./AuthSessionContext";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
+import styles from "../utils.module.css";
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ export default function Auth() {
 	}
 
   return (
-    <div className="row flex flex-center">
+    <div className={styles.centeredFlex}>
       <div className="col-6 form-widget" aria-live="polite">
         <h1 className="header">Supabase + React</h1>
         <p className="description">
@@ -39,7 +40,7 @@ export default function Auth() {
           "Sending magic link..."
         ) : (
           <form onSubmit={handleLogin}>
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email: </label>
             <input
               id="email"
               className="inputField"

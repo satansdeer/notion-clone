@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { NodeData } from "../state/AppStateContext";
+import { NodeData } from "../utils/types";
 
 export const useFocusedNodeIndex = (
   nodes: NodeData[]

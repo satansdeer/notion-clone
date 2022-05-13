@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { useMatch } from "react-router-dom";
-import { Page } from "./usePageState";
+import { Page } from "../utils/types";
+import { Loader } from "../components/Loader";
+import styles from "../utils.module.css";
 
 type InjectedProps = {
   initialState: Page;
@@ -22,7 +24,6 @@ export function withInitialState<TProps>(
     const [error, setError] = useState<Error | undefined>();
 
     useEffect(() => {
-			console.log("withInitialState", pageSlug);
       setIsLoading(true);
       const fetchInitialState = async () => {
         try {
@@ -43,7 +44,11 @@ export function withInitialState<TProps>(
     }, [pageSlug]);
 
     if (isLoading) {
-      return <div>Loading</div>;
+      return (
+        <div className={styles.centeredFlex}>
+          <Loader />
+        </div>
+      );
     }
 
     if (error) {

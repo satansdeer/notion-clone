@@ -1,64 +1,72 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { NodeData, NodeType, useAppState } from "../state/AppStateContext";
-import { supabase } from "../supabaseClient";
-import { uploadImage } from "../uploadImage";
+import { ChangeEvent, useEffect, useRef } from "react";
+import { FileImage } from "../components/FileImage";
+import { useAppState } from "../state/AppStateContext";
+import { NodeData } from "../utils/types";
+import { uploadImage } from "../utils/uploadImage";
 
 type ImageNodeProps = {
   node: NodeData;
+  isFocused: boolean;
+  index: number;
 };
 
-export const ImageNode = ({ node }: ImageNodeProps) => {
+export const ImageNode = ({ node, index, isFocused }: ImageNodeProps) => {
   const fileInputRef = useRef<any>(null);
-  const [imageUrl, setImageUrl] = useState("");
 
-  const { changeNodeValue } = useAppState();
+  const { changeNodeValue, changeNodeType, removeNodeByIndex } = useAppState();
 
   useEffect(() => {
-    if (!node.value) {
+    if (!node.value || node.value.length === 0) {
       fileInputRef.current.click();
     }
   }, [node.value]);
 
   useEffect(() => {
-    const downloadImage = async (filePath: string) => {
-      const { data } = await supabase.storage
-        .from("images")
-        .download(filePath);
-      if (data) {
-        console.log("Downloaded image", data);
-        const url = URL.createObjectURL(data);
-        setImageUrl(url);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      event.preventDefault();
+      if (event.key === "Backspace") {
+        removeNodeByIndex(index);
+      }
+      if (event.key === "Enter") {
+				fileInputRef.current.click();
       }
     };
-    if (node?.value) {
-      downloadImage(node?.value);
+
+    if (isFocused) {
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [node.type, node.value]);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isFocused, removeNodeByIndex, index, node]);
 
   const onImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    if (!target.files) {
+      changeNodeType(index, "text");
+    }
     try {
-      // setUploading(true)
-			const target = event.target as HTMLInputElement;
       const result = await uploadImage(target.files?.[0]);
-
-      // await changeNodeValue(node, result?.filePath);
-      // onUpload(filePath)
+      if (result?.filePath) {
+        await changeNodeValue(index, result?.filePath);
+      }
     } catch (error) {
-      // alert(error.message)
-    } finally {
-      // setUploading(false)
+      changeNodeType(index, "text");
     }
   };
 
   return (
-    <>
-      <img src={imageUrl} alt={node.value} />
+    <div className={`node image ${isFocused ? "focused" : ""}`}>
+      <FileImage filePath={node.value} />
       <input
         type="file"
         style={{ display: "none" }}
         ref={fileInputRef}
         onChange={onImageUpload}
       />
-    </>
+    </div>
   );
 };

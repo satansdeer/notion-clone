@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { NodeType } from "../state/AppStateContext";
-import { useOverflowsScreenBottom } from "../useOverflowsScreenBottom";
+import { useOverflowsScreenBottom } from "../hooks/useOverflowsScreenBottom";
+import { NodeType } from "../utils/types";
 import { SupportedNodeType } from "./BasicNode";
+import styles from "./CommandPanel.module.css";
 
 const supportedNodeTypes: SupportedNodeType[] = [
   { value: "text", name: "Text" },
@@ -47,14 +48,14 @@ export const CommandPanel = ({
   }, [nodeText]);
 
   return (
-    <div ref={ref} className={`command-panel ${overflows ? "reverse" : ""}`}>
-      <div className="command-panel-title">Blocks</div>
+    <div ref={ref} className={`${styles.panel} ${overflows ? styles.reverse : ""}`}>
+      <div className={styles.title}>Blocks</div>
       <ul>
         {supportedNodeTypes.map((type, index) => {
           const selected = selectedItemIndex === index;
           return (
             <li
-              className={selected ? "selected" : ""}
+              className={selected ? styles.selected : ""}
               key={type.value}
               onClick={() => selectItem(type.value)}
             >

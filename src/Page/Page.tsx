@@ -1,16 +1,17 @@
 import { nanoid } from "nanoid";
 import { useAppState } from "../state/AppStateContext";
-import { CoverImage } from "./CoverImage";
-import { PageSpacer } from "./PageSpacer";
-import { PageTitle } from "./PageTitle";
+import { Cover } from "./Cover";
+import { Spacer } from "./Spacer";
+import { Title } from "./Title";
 import { useFocusedNodeIndex } from "./useFocusedNodeIndex";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragOverlay } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { NodeContainer } from "../Node/NodeContainer";
+import { Link } from "react-router-dom";
+import styles from "./Page.module.css";
 
 export const Page = () => {
   const isRootPage = window.location.pathname === "/";
@@ -18,7 +19,6 @@ export const Page = () => {
     nodes,
     addNode,
     reorderNodes,
-    setNodes,
     title,
     cover,
     setTitle,
@@ -28,7 +28,6 @@ export const Page = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    console.log(active, over);
     if (over?.id && active.id !== over?.id) {
       reorderNodes(active.id, over.id);
     }
@@ -36,29 +35,38 @@ export const Page = () => {
 
   return (
     <>
-      <CoverImage filePath={cover} changePageCover={setCoverImage} />
-      {!isRootPage && <a href="/">Back to main page</a>}
-      <button onClick={() => setNodes(nodes.slice().reverse())}>Reorder</button>
-      <PageTitle title={title} changePageTitle={setTitle} />
-      <DndContext onDragEnd={handleDragEnd}>
-        <SortableContext strategy={verticalListSortingStrategy} items={nodes}>
-          {nodes.map((node, index) => (
-            <NodeContainer
-              key={node.id}
-              node={node}
-              isFocused={focusedNodeIndex === index}
-              index={index}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-      <PageSpacer
-        handleClick={() => {
-          addNode({ type: "text", value: "", id: nanoid() }, nodes.length);
-          setFocusedNodeIndex(nodes.length);
-        }}
-        showHint={!nodes.length}
-      />
+      <Cover filePath={cover} changePageCover={setCoverImage} />
+      <div className={styles.body}>
+        {!isRootPage && (
+          <div className={styles.backLink}>
+            <Link to="/">Back to the main page</Link>
+          </div>
+        )}
+        <Title title={title} changePageTitle={setTitle} />
+        <DndContext onDragEnd={handleDragEnd}>
+          <SortableContext strategy={verticalListSortingStrategy} items={nodes}>
+            {nodes.map((node, index) => (
+              <NodeContainer
+                key={node.id}
+                node={node}
+                isFocused={focusedNodeIndex === index}
+                updateFocusedIndex={setFocusedNodeIndex}
+                index={index}
+              />
+            ))}
+          </SortableContext>
+          <DragOverlay>
+            <div style={{ visibility: "hidden" }}>-</div>
+          </DragOverlay>
+        </DndContext>
+        <Spacer
+          handleClick={() => {
+            addNode({ type: "text", value: "", id: nanoid() }, nodes.length);
+            setFocusedNodeIndex(nodes.length);
+          }}
+          showHint={!nodes.length}
+        />
+      </div>
     </>
   );
 };

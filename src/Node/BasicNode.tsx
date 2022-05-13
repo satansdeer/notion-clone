@@ -1,12 +1,10 @@
 import { KeyboardEvent, FormEvent } from "react";
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
-import {
-  NodeData,
-  NodeType,
-	useAppState,
-} from "../state/AppStateContext";
+import { useAppState } from "../state/AppStateContext";
 import { CommandPanel } from "./CommandPanel";
+import { NodeData, NodeType } from "../utils/types";
+import nodeStyles from "./Node.module.css";
 
 export type SupportedNodeType = {
   value: NodeType;
@@ -39,6 +37,8 @@ export const BasicNode = ({
   useEffect(() => {
     if (isFocused) {
       nodeRef.current?.focus();
+    } else {
+      nodeRef.current?.blur();
     }
   }, [isFocused]);
 
@@ -87,10 +87,7 @@ export const BasicNode = ({
   return (
     <>
       {showCommandPanel && (
-        <CommandPanel
-          selectItem={parseCommand}
-          nodeText={node.value}
-        />
+        <CommandPanel selectItem={parseCommand} nodeText={node.value} />
       )}
       <div
         data-placeholder="Type '/' for commands"
@@ -100,7 +97,7 @@ export const BasicNode = ({
         onInput={handleInput}
         contentEditable
         suppressContentEditableWarning
-        className={`node ${node.type}`}
+        className={`${nodeStyles.node} ${nodeStyles[node.type]}`}
       />
     </>
   );

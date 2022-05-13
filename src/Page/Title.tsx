@@ -1,13 +1,14 @@
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
 import { useAppState } from "../state/AppStateContext";
+import styles from "./Title.module.css";
 
-type PageTitleProps = {
+type TitleProps = {
   title: string;
   changePageTitle(title: string): void;
 };
 
-export const PageTitle = ({ title, changePageTitle }: PageTitleProps) => {
+export const Title = ({ title, changePageTitle }: TitleProps) => {
   const headerRef = useRef<any>(null);
 
   const { addNode } = useAppState();
@@ -17,10 +18,10 @@ export const PageTitle = ({ title, changePageTitle }: PageTitleProps) => {
   }, [title]);
 
   return (
-    <div className="title-container">
+    <div className={styles.container}>
       {/* eslint-disable-next-line jsx-a11y/heading-has-content */}
       <h1
-        className="title"
+        className={styles.title}
         ref={headerRef}
         onKeyDown={(event) => {
           if (event.key === "Enter") {

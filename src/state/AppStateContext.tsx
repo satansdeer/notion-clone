@@ -1,23 +1,9 @@
 import { createContext, useContext } from "react";
-import { Page, usePageState } from "./usePageState";
+import { usePageState } from "./usePageState";
+import { Page } from "../utils/types";
 import { withInitialState } from "./withInitialState";
 
 type AppStateContextType = ReturnType<typeof usePageState>;
-
-export type NodeType =
-  | "text"
-  | "image"
-  | "list"
-  | "page"
-  | "heading1"
-  | "heading2"
-  | "heading3";
-
-export type NodeData = {
-  id: string;
-  type: NodeType;
-  value: string;
-};
 
 const AppStateContext = createContext<AppStateContextType>(
   {} as AppStateContextType

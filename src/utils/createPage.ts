@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
 
 export const createPage = async () => {
   const user = supabase.auth.user();
@@ -15,8 +15,6 @@ export const createPage = async () => {
     created_by: user.id,
   };
 
-  const { data } = await supabase.from("pages").insert(page);
-  console.log("Created page", data);
-
+  await supabase.from("pages").insert(page);
   return page;
 };
