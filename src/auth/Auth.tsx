@@ -32,7 +32,7 @@ export default function Auth() {
   return (
     <div className={styles.centeredFlex}>
       <div aria-live="polite">
-        <h1>Supabase + React</h1>
+        <h1>ZTM Notes App</h1>
         <p>Sign in via magic link with your email below</p>
         {loading ? (
           "Sending magic link..."

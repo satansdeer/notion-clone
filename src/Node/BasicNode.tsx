@@ -33,6 +33,7 @@ export const BasicNode = ({
 
   const parseCommand = (nodeType: NodeType) => {
     changeNodeType(index, nodeType);
+		nodeRef.current.textContent = "";
   };
 
   useEffect(() => {
