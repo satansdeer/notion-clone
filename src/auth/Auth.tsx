@@ -25,17 +25,15 @@ export default function Auth() {
     }
   };
 
-	if(session){
-		return <Navigate to="/"/>
-	}
+  if (session) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div className={styles.centeredFlex}>
-      <div className="col-6 form-widget" aria-live="polite">
-        <h1 className="header">Supabase + React</h1>
-        <p className="description">
-          Sign in via magic link with your email below
-        </p>
+      <div aria-live="polite">
+        <h1>Supabase + React</h1>
+        <p>Sign in via magic link with your email below</p>
         {loading ? (
           "Sending magic link..."
         ) : (
@@ -43,15 +41,12 @@ export default function Auth() {
             <label htmlFor="email">Email: </label>
             <input
               id="email"
-              className="inputField"
               type="email"
               placeholder="Your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <button className="button block" aria-live="polite">
-              Send magic link
-            </button>
+            <button aria-live="polite">Send magic link</button>
           </form>
         )}
       </div>

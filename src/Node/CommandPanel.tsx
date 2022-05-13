@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useOverflowsScreenBottom } from "../hooks/useOverflowsScreenBottom";
+import { useOverflowsScreenBottom } from "./useOverflowsScreenBottom";
 import { NodeType } from "../utils/types";
 import { SupportedNodeType } from "./BasicNode";
 import styles from "./CommandPanel.module.css";
+import cx from "classnames";
 
 const supportedNodeTypes: SupportedNodeType[] = [
   { value: "text", name: "Text" },
@@ -19,10 +20,7 @@ type CommandPanelProps = {
   selectItem: (nodeType: NodeType) => void;
 };
 
-export const CommandPanel = ({
-  selectItem,
-  nodeText,
-}: CommandPanelProps) => {
+export const CommandPanel = ({ selectItem, nodeText }: CommandPanelProps) => {
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const { overflows, ref } = useOverflowsScreenBottom();
 
@@ -38,7 +36,7 @@ export const CommandPanel = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedItemIndex , selectItem]);
+  }, [selectedItemIndex, selectItem]);
 
   useEffect(() => {
     const normalizedValue = nodeText.toLowerCase().replace(/\//g, "");
@@ -48,14 +46,21 @@ export const CommandPanel = ({
   }, [nodeText]);
 
   return (
-    <div ref={ref} className={`${styles.panel} ${overflows ? styles.reverse : ""}`}>
+    <div
+      ref={ref}
+      className={cx(styles.panel, {
+        [styles.reverse]: overflows,
+      })}
+    >
       <div className={styles.title}>Blocks</div>
       <ul>
         {supportedNodeTypes.map((type, index) => {
           const selected = selectedItemIndex === index;
           return (
             <li
-              className={selected ? styles.selected : ""}
+              className={cx({
+                [styles.selected]: selected,
+              })}
               key={type.value}
               onClick={() => selectItem(type.value)}
             >

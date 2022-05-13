@@ -21,7 +21,9 @@ export const FileImage = ({ filePath, ...props }: FileImageProps) => {
         setLoading(false);
       }
     };
-    downloadImage(filePath);
+		if(filePath && filePath.length > 0) {
+    	downloadImage(filePath);
+		}
   }, [filePath]);
 
   if (loading) {

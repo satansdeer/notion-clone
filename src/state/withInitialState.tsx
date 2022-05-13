@@ -4,6 +4,7 @@ import { useMatch } from "react-router-dom";
 import { Page } from "../utils/types";
 import { Loader } from "../components/Loader";
 import styles from "../utils.module.css";
+import startPageScaffold from "./startPageScaffold.json";
 
 type InjectedProps = {
   initialState: Page;
@@ -27,14 +28,33 @@ export function withInitialState<TProps>(
       setIsLoading(true);
       const fetchInitialState = async () => {
         try {
+          const user = supabase.auth.user();
+          if (!user) {
+            throw new Error("User is not logged in");
+          }
           const { data } = await supabase
             .from("pages")
             .select(`title, id, cover, nodes`)
             .eq("slug", pageSlug)
+            .eq("created_by", user.id)
             .single();
-          setInitialState(data);
+          if (!data && pageSlug === "start") {
+            console.log("CREATING START PAGE");
+            const result = await supabase
+              .from("pages")
+              .insert({
+                ...startPageScaffold,
+                slug: "start",
+                created_by: user.id,
+              })
+              .single();
+            setInitialState(result?.data);
+          } else {
+            setInitialState(data);
+          }
         } catch (e) {
           if (e instanceof Error) {
+            console.log(e);
             setError(e);
           }
         }
@@ -56,7 +76,7 @@ export function withInitialState<TProps>(
     }
 
     if (!initialState) {
-      return <div>Page not found</div>;
+      return <div className={styles.centeredFlex}>Page not found</div>;
     }
 
     return <WrappedComponent {...props} initialState={initialState} />;

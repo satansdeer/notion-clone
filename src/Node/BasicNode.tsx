@@ -5,6 +5,7 @@ import { useAppState } from "../state/AppStateContext";
 import { CommandPanel } from "./CommandPanel";
 import { NodeData, NodeType } from "../utils/types";
 import nodeStyles from "./Node.module.css";
+import cx from "classnames";
 
 export type SupportedNodeType = {
   value: NodeType;
@@ -46,7 +47,13 @@ export const BasicNode = ({
     if (nodeRef.current) {
       nodeRef.current.textContent = node.value;
     }
-  }, [node?.value]);
+  }, []);
+
+  useEffect(() => {
+    if (nodeRef.current && !isFocused) {
+      nodeRef.current.textContent = node.value;
+    }
+  }, [node?.value, isFocused]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
@@ -97,7 +104,7 @@ export const BasicNode = ({
         onInput={handleInput}
         contentEditable
         suppressContentEditableWarning
-        className={`${nodeStyles.node} ${nodeStyles[node.type]}`}
+        className={cx(nodeStyles.node, nodeStyles[node.type])}
       />
     </>
   );

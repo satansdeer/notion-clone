@@ -4,7 +4,7 @@ import { supabase } from "../supabaseClient";
 export const createPage = async () => {
   const user = supabase.auth.user();
   if (!user) {
-    return;
+		throw new Error("You must be logged in to create a page.");
   }
   const slug = nanoid();
 

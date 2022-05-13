@@ -3,6 +3,8 @@ import { FileImage } from "../components/FileImage";
 import { useAppState } from "../state/AppStateContext";
 import { NodeData } from "../utils/types";
 import { uploadImage } from "../utils/uploadImage";
+import styles from "./Node.module.css";
+import cx from "classnames";
 
 type ImageNodeProps = {
   node: NodeData;
@@ -28,7 +30,7 @@ export const ImageNode = ({ node, index, isFocused }: ImageNodeProps) => {
         removeNodeByIndex(index);
       }
       if (event.key === "Enter") {
-				fileInputRef.current.click();
+        fileInputRef.current.click();
       }
     };
 
@@ -59,7 +61,11 @@ export const ImageNode = ({ node, index, isFocused }: ImageNodeProps) => {
   };
 
   return (
-    <div className={`node image ${isFocused ? "focused" : ""}`}>
+    <div
+      className={cx(styles.node, styles.image, {
+        [styles.focused]: isFocused,
+      })}
+    >
       <FileImage filePath={node.value} />
       <input
         type="file"

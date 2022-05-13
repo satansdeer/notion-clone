@@ -8,14 +8,14 @@ type NodeContainerProps = {
   node: NodeData;
   index: number;
   isFocused: boolean;
-	updateFocusedIndex(index: number): void;
+  updateFocusedIndex(index: number): void;
 };
 
 export const NodeContainer = ({
   node,
   index,
   isFocused,
-	updateFocusedIndex,
+  updateFocusedIndex,
 }: NodeContainerProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: node.id });
@@ -35,7 +35,12 @@ export const NodeContainer = ({
       <div {...listeners} className={styles.dragHandle}>
         ⠿
       </div>
-      <NodeTypeSwitcher updateFocusedIndex={updateFocusedIndex} node={node} index={index} isFocused={isFocused} />
+      <NodeTypeSwitcher
+        updateFocusedIndex={updateFocusedIndex}
+        node={node}
+        index={index}
+        isFocused={isFocused}
+      />
     </div>
   );
 };

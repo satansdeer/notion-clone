@@ -10,12 +10,10 @@ export const uploadImage = async (file?: File) => {
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    await supabase.storage
-      .from("images")
-      .upload(filePath, file);
+    await supabase.storage.from("images").upload(filePath, file);
 
     return { filePath, fileName };
   } catch (error: any) {
-    alert(error.message)
+    alert(error.message);
   }
 };
