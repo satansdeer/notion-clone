@@ -47,6 +47,7 @@ export const BasicNode = ({
     if (nodeRef.current) {
       nodeRef.current.textContent = node.value;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
