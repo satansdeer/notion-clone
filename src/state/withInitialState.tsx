@@ -35,7 +35,7 @@ export function withInitialState<TProps>(
           const { data } = await supabase
             .from("pages")
             .select(`title, id, cover, nodes`)
-						.match({slug: pageSlug, createdBy: user.id})
+            .match({ slug: pageSlug, created_by: user.id })
             .single();
           if (!data && pageSlug === "start") {
             console.log("CREATING START PAGE");
